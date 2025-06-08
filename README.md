@@ -56,7 +56,7 @@ To get V.I.K.I. up and running quickly for development and testing, we recommend
 
 1.  **Clone the Repository:**
     ```bash
-    git clone [https://github.com/YOUR_GITHUB_USERNAME/viki-va.git](https://github.com/YOUR_GITHUB_USERNAME/viki-va.git)
+    git clone git@github.com:AppCarver/viki-va.git
     cd viki-va
     ```
 2.  **Spin Up Services:**
