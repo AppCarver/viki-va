@@ -1,0 +1,48 @@
+# This file is for EditorConfig (editorconfig.org)
+# Top-most EditorConfig file
+root = true
+
+[*]
+# General settings for all file types
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.py]
+# Python-specific settings
+indent_style = space
+indent_size = 4
+# Python's PEP 8 recommends a maximum line length of 79 characters,
+# but Black (your formatter) often uses 88. Align with Black.
+max_line_length = 88
+
+[*.js]
+# JavaScript-specific settings
+indent_style = space
+indent_size = 2 # Common for JS (React, etc.)
+# Prettier (your formatter) will handle most of this, but good to define a default.
+max_line_length = 80 # Or 120, depending on team preference and Prettier config
+
+[*.ts]
+# TypeScript-specific settings (often same as JS)
+indent_style = space
+indent_size = 2
+max_line_length = 80 # Or 120
+
+[*.go]
+# Go-specific settings (gofmt is prescriptive, so these are mostly for consistency)
+indent_style = tab
+indent_size = 4 # Though Go uses tabs, this still matters for alignment
+# gofmt typically doesn't have a strict line length, but 100-120 is common for readability.
+max_line_length = 120
+
+[*.md]
+# Markdown files
+trim_trailing_whitespace = false
+# No strict indentation/line length for prose
+
+[Makefile]
+# Makefiles use tabs for commands
+indent_style = tab
+indent_size = 8 # Standard for Makefiles

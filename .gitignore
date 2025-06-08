@@ -1,0 +1,156 @@
+# ---------------------------------------------------------------
+# General Operating System and Editor Files
+# ---------------------------------------------------------------
+.DS_Store
+.Trash
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+*.iml
+*.iws
+*.ipr
+.idea/
+.vscode/
+*.swp
+*~
+.#*
+#*#
+
+# ---------------------------------------------------------------
+# Python Specific
+# ---------------------------------------------------------------
+# Byte-code files
+*.pyc
+__pycache__/
+.pytest_cache/
+.coverage
+.mypy_cache/
+.dmypy.json
+.eggs/
+*.egg
+*.egg-info/
+build/
+dist/
+
+# Virtual environment
+venv/
+.venv/
+env/
+.env/
+
+# Jupyter Notebook / IPython
+.ipynb_checkpoints
+profile_default/
+ipython_config.py
+notebooks/.ipynb_checkpoints/
+
+# Python-specific IDEs (e.g., PyCharm)
+.idea/
+.vscode/
+
+# ---------------------------------------------------------------
+# Node.js Specific
+# ---------------------------------------------------------------
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnp/
+.pnp.js
+.npm/
+.yarn/
+.cache/
+.next/ # Next.js build output
+out/  # Common build output for various JS frameworks
+
+# Optional: if you don't want to commit lock files
+# package-lock.json
+# yarn.lock
+
+# ---------------------------------------------------------------
+# Go Specific
+# ---------------------------------------------------------------
+# Binaries for programs and plugins
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Test binary, generated with `go test -c`
+*.test
+
+# Compiled objects (Go build cache)
+*.out
+
+# Mac desktop service stores (might include Go-specific caches)
+.fseventsd/
+.Spotlight-V100/
+.Trashes/
+
+# Package files
+/pkg/
+/bin/
+
+# Profile output, from `go test -cpuprofile`
+*.prof
+
+# Module cache, usually in GOPATH
+# /src/vendor/
+
+# ---------------------------------------------------------------
+# Docker Specific
+# ---------------------------------------------------------------
+# Ignore Docker build context artifacts and volumes
+.docker_build_cache/
+.docker_volumes/
+*.log # Docker logs
+
+# Dotenv files for Docker Compose
+.env # crucial for local env vars, don't commit!
+
+# ---------------------------------------------------------------
+# Configuration Files (Sensitive or Local)
+# ---------------------------------------------------------------
+# Environment variables
+.env.*.local
+.env.local
+.env
+# Local overrides for configuration (e.g., config.local.py)
+*.local.py
+*.local.json
+*.local.yaml
+*.local.yml
+
+# ---------------------------------------------------------------
+# Logs and Temporary Files
+# ---------------------------------------------------------------
+*.log
+*.log.*
+/tmp/
+*.temp
+*.tmp
+*.bak
+*.old
+
+# ---------------------------------------------------------------
+# Machine Learning Specific (if models/datasets are not versioned)
+# ---------------------------------------------------------------
+# Large model files (if not using Git LFS or external storage)
+models/*.bin
+models/*.pt
+models/*.h5
+models/*.onnx
+models/*.pb
+models/*.ckpt
+models/*.zip
+models/*.tar.gz
+models/nlu/ # If you don't want to commit downloaded NLU models
+
+# Generated datasets or processed data
+data/processed/
+data/output/
+
+# Training logs
+training_logs/
+runs/ # For TensorBoard/MLflow runs
+wandb/ # For Weights & Biases runs
