@@ -5,6 +5,7 @@
 Receives and standardizes all user-initiated communication.
 """
 
+import datetime
 import uuid
 from typing import Any
 
@@ -47,19 +48,54 @@ class InputProcessor:
             A dictionary containing the processing outcome.
 
         """
-        print(f"Processing audio input from device {device_id}...")
-        # Placeholder for ASR, text normalization, user/device identification,
-        # conversation continuity, logging, and handover.
-        # This is where the detailed logic from your spec will be implemented.
+        current_timestamp = datetime.datetime.now(datetime.UTC)
+        print(
+            f"Processing audio input from device {device_id} at {current_timestamp}..."
+        )
 
-        # Dummy return for now
+        # --- Step 1: Input Pre-processing & Timestamping (for audio) ---
+        transcribed_text: str = ""
+
+        # Simulate ASR call ( replace with acutal ASR service integration later)
+        if raw_audio_data:
+            transcribed_text = f"Dummy ASR of audio data length {len(raw_audio_data)}"
+        else:
+            # Handle ASR failures e.g., empty audio data
+
+            # Placeholder for ASR, text normalization, user/device identification,
+            # conversation continuity, logging, and handover.
+            # This is where the detailed logic from your spec will be implemented.
+            return {
+                "success": False,
+                "turn_id": uuid.uuid4(),
+                "conversation_id": uuid.uuid4(),
+                "user_id": uuid.uuid4(),
+                "processed_text": "",
+                "error": "ASRTranscriptionError: Empty audio data",
+            }
+
+        processed_text = transcribed_text.strip()
+        if not processed_text:
+            return {
+                "success": False,
+                "turn_id": uuid.uuid4(),
+                "conversation_id": uuid.uuid4(),
+                "user_id": uuid.uuid4(),
+                "processed_text": "",
+                "error": "ASRTranscriptionError: Empty transcription",
+            }
+        # --- End Step 1 for audio ---
+
+        # The rest of the logic (Steps 2-6) will be common, but we'll add it later.
+
+        # For now, we'll return based on the initial processing.
         return {
             "success": False,
             "turn_id": uuid.uuid4(),
             "conversation_id": uuid.uuid4(),
             "user_id": uuid.uuid4(),
-            "processed_text": "",
-            "error": "Not yet implemented",
+            "processed_text": processed_text,
+            "error": "",
         }
 
     def process_text_input(
@@ -84,17 +120,39 @@ class InputProcessor:
                 A dictionary containing the processing outcome.
 
         """
-        print(f"Processing text input '{raw_text_string}' from device {device_id}...")
-        # Placeholder for text normalization, user/device identification,
-        # conversation continuity, logging, and handover.
-        # This is where the detailed logic from your spec will be implemented.
+        current_timestamp = datetime.datetime.now(datetime.UTC)
+        print(
+            f"Processing audio input from device {device_id} at {current_timestamp}..."
+        )
 
-        # Dummy return for now
+        # --- Step 1: Input Pre-processing & Timestamping (for audio) ---
+        current_timestamp = datetime.datetime.now(datetime.UTC)
+        print(
+            f"Processing text input '{raw_text_string}' from device {device_id} "
+            f"at {current_timestamp}..."
+        )
+
+        # --- Step 1: Input Pre-processing & Timestamping (for text) ---
+        processed_text = raw_text_string.strip()
+        if not processed_text:
+            return {
+                "success": False,
+                "turn_id": uuid.uuid4(),
+                "conversation_id": uuid.uuid4(),
+                "user_id": uuid.uuid4(),
+                "processed_text": "",
+                "error": "EmptyTextInputError: Text input was empty or only whitespace",
+            }
+        # --- End Step 1 for text ---
+
+        # The rest of the logic (Steps 2-6) will be common, but we'll add it later.
+
+        # For now, we'll return based on the initial processing.
         return {
-            "success": False,
+            "success": False,  # Indicate success for now after initial processing
             "turn_id": uuid.uuid4(),
             "conversation_id": uuid.uuid4(),
             "user_id": uuid.uuid4(),
-            "processed_text": raw_text_string,  # we can return the raw text for now
-            "error": "Not yet implemented",
+            "processed_text": processed_text,
+            "error": "",
         }

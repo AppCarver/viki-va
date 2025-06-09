@@ -1,5 +1,51 @@
 # viki-va/pyproject.toml
 
+[project]
+name = "viki-va"
+version = "0.0.1" # Initial version. We can update this later.
+description = "A sophisticated voice AI assistant designed to enhance productivity and daily life."
+readme = "README.md"
+requires-python = ">=3.12" # Matches your installed Python version
+license = { file = "LICENSE" }
+authors = [
+    { name = "John Carver", email = "john.carver@example.com" }, # You might want to update this with your actual details
+]
+keywords = ["AI", "Voice Assistant", "Productivity"]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [] # Core runtime dependencies will go here later
+
+[project.urls]
+Homepage = "https://github.com/AppCarver/viki-va" # Please replace with your actual GitHub repo URL
+"Bug Tracker" = "https://github.com/AppCarver/viki-va/issues" # Please replace with your actual GitHub issues URL
+
+[project.optional-dependencies]
+dev = [
+    "ruff==0.1.13",
+    "pytest==8.4.0",
+    "mypy==1.16.0",
+    "pre-commit==3.7.1", # <--- THIS LINE IS CRUCIAL FOR pre-commit TO BE INSTALLED
+]
+
+# ----------------------------------
+
+[build-system]
+requires = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+# --- ADD THIS NEW SECTION HERE ---
+[tool.setuptools]
+# Explicitly list the top-level Python packages that should be included.
+# This prevents setuptools from erroring due to "multiple packages in flat-layout".
+packages = ["services", "data_models", "shared_libs", "models"]
+# ----------------------------------
+
 [tool.ruff]
 line-length = 88
 target-version = "py312" # Confirm this matches your Python environment (e.g., "py310", "py311")
