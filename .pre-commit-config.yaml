@@ -20,12 +20,23 @@ repos:
         types: [python] # Only run this hook on Python files
         pass_filenames: false # pytest runs on discovered files, not just changed ones
         always_run: true # Ensures pytest runs even if no Python files changed (useful for initial setup or config changes)
+        files: ^(services/|tests/) # Only run if changes in services or top-level tests
+        env:
+          PYTHONPATH: . # Explicitly set PYTHONPATH to the current directory (project root)
         
   # MyPy for static type checking
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.16.0 # Latest confirmed version by your autoupdate
     hooks:
       - id: mypy
-        args: [] # Mypy will read its config from pyproject.toml
-        # If you need to explicitly check certain paths, you could add them here, e.g.:
-        # args: ["services/", "src/"]
+        name: mypy
+        entry: mypy
+        language: system
+        pass_filenames: false
+        always_run: true
+        types: [python]
+        # Add this env section:
+        files: ^services/ # Only run mypy on files within the services directory
+        env:
+          PYTHONPATH: . # Explicitly set PYTHONPATH to the current directory (project root)
+        args: [services/] # <--- ADD THIS LINE: Tell mypy to check the services directory
