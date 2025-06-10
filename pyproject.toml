@@ -30,7 +30,9 @@ dev = [
     "ruff==0.1.13",
     "pytest==8.4.0",
     "mypy==1.16.0",
-    "pre-commit==3.7.1", # <--- THIS LINE IS CRUCIAL FOR pre-commit TO BE INSTALLED
+    "pre-commit==3.7.1",
+    "google-genai~=1.19.0",      # <--- Allow minor updates (e.g., 1.19.x, 1.20.x, but not 2.0.0)
+    "python-dotenv~=1.0",
 ]
 
 # ----------------------------------
