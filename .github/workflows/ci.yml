@@ -27,11 +27,11 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install ruff pytest mypy # Install our core tools
-          # If you later create a requirements.txt, you would change this to:
-          # pip install -r requirements.txt
+          pip install ruff pytest mypy
+          # --- ADD/UNCOMMENT THIS LINE ---
+          pip install -r requirements.txt
+          # --- END ADDITION/UNCOMMENT ---
 
-      # Optional: Cache installed Python dependencies to speed up future runs
       - name: Cache Python dependencies
         uses: actions/cache@v4
         with:
@@ -43,10 +43,10 @@ jobs:
       - name: Run Ruff (Linting & Formatting)
         run: |
           ruff check . --config pyproject.toml
-          ruff format . --check --config pyproject.toml # --check ensures it only checks for formatting issues, doesn't fix
+          ruff format . --check --config pyproject.toml
 
       - name: Run Pytest (Tests)
-        run: pytest # Pytest will find its config in pyproject.toml
+        run: pytest
 
       - name: Run MyPy (Type Checking)
-        run: mypy . # MyPy will find its config in pyproject.toml
+        run: mypy .
