@@ -28,7 +28,7 @@ from services.nlu_service.src.gemini_nlu_service import GeminiNLUService
 dotenv.load_dotenv()
 
 
-def main():
+def main() -> None:
     """Run the Viki Virtual Assistant's main conversational loop.
 
     This function initializes the Natural Language Understanding (NLU) service
