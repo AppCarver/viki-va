@@ -85,18 +85,21 @@ If a hook fails, pre-commit will tell you why. Fix the issues, `git add` the cha
 
 ## 4.2 Language-Specific Guidelines
 
-### Python
+# Python
 
-- **Formatter:** Black  
-- **Linter:** Flake8 (with isort for import sorting)  
-- **Style Guide:** Adhere to [PEP 8](https://peps.python.org/pep-0008/)
+- **Formatter & Linter:** We use **Ruff** for both code formatting (Black-compatible) and linting (Flake8-compatible, plus many other checks). Ruff helps us enforce consistent style and identify common issues.
+- **Type Checker:** We use **MyPy** for static type checking. This helps ensure code correctness and maintainability, especially for larger codebases.
+- **Style Guide:** Adhere to [PEP 8](https://peps.python.org/pep-0008/) and our project's specific Ruff configuration (defined in `pyproject.toml`).
 
 #### Local Commands
 
+Before committing, `pre-commit` will automatically run these checks. However, you can run them manually to see results or fix issues:
+
 ```bash
-black .
-flake8 .
-isort .
+ruff check . # Run linters and checks
+ruff format . # Run formatter (will apply fixes)
+mypy . # Run static type checker
+pytest # Run tests
 ```
 
 ### JavaScript/TypeScript

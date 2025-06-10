@@ -1,0 +1,142 @@
+# viki-va/pyproject.toml
+
+[project]
+name = "viki-va"
+version = "0.0.1" # Initial version. We can update this later.
+description = "A sophisticated voice AI assistant designed to enhance productivity and daily life."
+readme = "README.md"
+requires-python = ">=3.12" # Matches your installed Python version
+license = { file = "LICENSE" }
+authors = [
+    { name = "John Carver", email = "john.carver@example.com" }, # You might want to update this with your actual details
+]
+keywords = ["AI", "Voice Assistant", "Productivity"]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [] # Core runtime dependencies will go here later
+
+[project.urls]
+Homepage = "https://github.com/AppCarver/viki-va" # Please replace with your actual GitHub repo URL
+"Bug Tracker" = "https://github.com/AppCarver/viki-va/issues" # Please replace with your actual GitHub issues URL
+
+[project.optional-dependencies]
+dev = [
+    "ruff==0.1.13",
+    "pytest==8.4.0",
+    "mypy==1.16.0",
+    "pre-commit==3.7.1",
+    "google-genai~=1.19.0",      # <--- Allow minor updates (e.g., 1.19.x, 1.20.x, but not 2.0.0)
+    "python-dotenv~=1.0",
+]
+
+# ----------------------------------
+
+[build-system]
+requires = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+# --- ADD THIS NEW SECTION HERE ---
+[tool.setuptools]
+# Explicitly list the top-level Python packages that should be included.
+# This prevents setuptools from erroring due to "multiple packages in flat-layout".
+packages = ["services", "data_models", "shared_libs", "models"]
+# ----------------------------------
+
+[tool.ruff]
+line-length = 88
+target-version = "py312" # Confirm this matches your Python environment (e.g., "py310", "py311")
+
+# All linting-related configurations now go under [tool.ruff.lint]
+[tool.ruff.lint]
+# Select all the rules you want to enable
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # Pyflakes
+    "I",   # isort (import sorting)
+    "N",   # pep8-naming
+    "D",   # pydocstyle (docstring style)
+    "UP",  # pyupgrade (modernize code)
+    "B",   # flake8-bugbear
+    "A",   # flake8-unused-arguments
+    "RUF", # Ruff's own rules
+    # Add other categories if desired, e.g.:
+    # "PL",  # Pylint rules (use PL, PLC, PLE, PLR, PLW for specific categories)
+    # "ANN", # flake8-annotations
+    # "PT",  # flake8-pytest-style
+    # "S",   # flake8-bandit (security linter)
+    # "C4",  # flake8-comprehensions
+]
+ignore = [] # Add specific rules here if you want to disable them globally, e.g., ["D100", "D203"]
+
+exclude = [ # Paths to exclude from all Ruff checks (this remains at tool.ruff level)
+    ".git",
+    ".venv",
+    "__pycache__",
+    ".mypy_cache",
+    ".pytest_cache",
+    ".vscode",
+    "build",
+    "dist",
+    "deployment", # Your deployment configs
+    "data_models", # Your data model definitions (likely Markdown)
+    "docs",        # Your documentation
+    "models",      # Your ML models/data
+    "front_end",   # Your frontend code
+    "services/*/Dockerfile", # Dockerfiles inside service directories
+    "services/*/config.json", # Configs inside service directories
+    "services/*/tests", # Exclude tests from linting (often useful for more lenient test code)
+]
+
+[tool.ruff.lint.mccabe] # Configuration for McCabe complexity checks (rule C901, included in 'C' category if selected)
+max-complexity = 10
+
+[tool.ruff.lint.isort] # Configuration for Ruff's integrated isort functionality
+known-first-party = ["src", "services", "shared_libs"] # Tells isort your internal packages
+
+[tool.pytest.ini_options]
+# Specifies the directories where pytest should look for tests.
+# Given your 'services/*/tests' structure, this is crucial.
+testpaths = [
+    "services", # pytest will recursively find 'tests' folders within 'services'
+]
+addopts = [
+    "--strict-markers", # Warns about unknown markers
+    "--strict-config",  # Warns about unknown config options
+    "-ra",              # Show extra info on test failures/errors
+    "--durations=10",   # Show slowest 10 tests
+    "--cache-clear",    # Clear pytest cache before each run (useful for CI)
+    "--no-header",      # Don't show the pytest header
+]
+
+
+[tool.mypy]
+# Global default settings for mypy
+python_version = "3.12" # Set this to match your target-version in Ruff (e.g., "3.10", "3.11", "3.12")
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_unreachable = true
+
+# Recommended general settings for robust checking
+disallow_untyped_defs = true       # Error if function has no type hints
+no_implicit_optional = true        # Error if Optional isn't explicit
+strict_equality = true             # More robust equality checks
+warn_return_any = true             # Warn if function returns Any
+warn_no_return = true              # Warn if function might not return a value
+check_untyped_defs = true          # Check functions without type hints (still allows them)
+ignore_missing_imports = true      # Ignore imports for libraries mypy doesn't have stubs for yet
+
+# You can add specific settings for certain directories/modules.
+# For example, to be less strict with tests initially, if needed:
+[[tool.mypy.overrides]]
+# For test files, you might relax some checks if you want to skip typing tests thoroughly.
+# However, for 'solid quality', it's better to type tests too!
+module = "services.*.tests.*" # Adjust this pattern to match your test file naming
+disallow_untyped_defs = false # Example: Allow untyped definitions in tests
+ignore_errors = false # Ensure errors are not ignored

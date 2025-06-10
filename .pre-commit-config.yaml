@@ -1,0 +1,42 @@
+# .pre-commit-config.yaml
+# Placed in the root of your Git repository (e.g., viki-va/)
+
+repos:
+  # Ruff for linting and formatting
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.11.13 # Latest confirmed version by your autoupdate
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix] # Apply fixes and exit with error code if fixes were applied
+      - id: ruff-format # This hook handles formatting (Black-compatible)
+
+  # Pytest for running tests (configured as a local hook)
+  - repo: local
+    hooks:
+      - id: pytest
+        name: pytest
+        entry: pytest
+        language: system # This tells pre-commit to run 'pytest' from your shell's PATH (which includes your virtual env)
+        types: [python] # Only run this hook on Python files
+        pass_filenames: false # pytest runs on discovered files, not just changed ones
+        always_run: true # Ensures pytest runs even if no Python files changed (useful for initial setup or config changes)
+        files: ^(services/|tests/) # Only run if changes in services or top-level tests
+        env:
+          PYTHONPATH: . # Explicitly set PYTHONPATH to the current directory (project root)
+        
+  # MyPy for static type checking
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.16.0 # Latest confirmed version by your autoupdate
+    hooks:
+      - id: mypy
+        name: mypy
+        entry: mypy
+        language: system
+        pass_filenames: false
+        always_run: true
+        types: [python]
+        # Add this env section:
+        files: ^services/ # Only run mypy on files within the services directory
+        env:
+          PYTHONPATH: . # Explicitly set PYTHONPATH to the current directory (project root)
+        args: [services/] # <--- ADD THIS LINE: Tell mypy to check the services directory
