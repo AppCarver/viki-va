@@ -23,12 +23,14 @@ Key functionalities include:
 - Robust error handling for NLU processing failures, invalid input,
   and unexpected issues.
 
-Raises:
+Raises
+------
     ValueError: If an invalid device ID format is provided during processing.
     NLUProcessingError: If the underlying NLU service encounters an error
                         during intent and entity extraction.
 
-Returns:
+Returns
+-------
     Dict[str, Any]: A dictionary containing the processing result, including:
         - 'success' (bool): True if NLU processed successfully (intent not 'unknown').
         - 'processed_text' (str):
@@ -82,6 +84,7 @@ class InputProcessor:
         """Initialize the InputProcessor with an NLU service and optional ASR service.
 
         Args:
+        ----
             nlu_service: An instance of a class implementing NLUServiceInterface
                          (e.g., GeminiNLUService, OpenAINLUService).
             asr_service: An optional ASR (Automatic Speech Recognition) service.
@@ -96,10 +99,12 @@ class InputProcessor:
         """Process text input, identifies intent, and extracts entities using the NLU.
 
         Args:
+        ----
             text: The raw text input from the user.
             device_id: The UUID of the device from which the input originated.
 
         Returns:
+        -------
             A dictionary containing the processed result, including success status,
             extracted intent and entities, processed text, user_id,
             and any error message.
@@ -207,10 +212,12 @@ class InputProcessor:
         """Process audio input. Currently uses a dummy ASR and then NLU.
 
         Args:
+        ----
             raw_audio_data: The raw audio bytes from the user.
             device_id: The UUID of the device from which the input originated.
 
         Returns:
+        -------
             A dictionary containing the processed result, similar to process_text_input.
 
         """
@@ -232,12 +239,15 @@ class InputProcessor:
         """Delegate NLU processing to the injected NLU service.
 
         Args:
+        ----
             text: The text to be processed by the NLU service.
 
         Returns:
+        -------
             A dictionary containing the intent and entities from the NLU service.
 
         Raises:
+        ------
             NLUProcessingError: If the underlying NLU service encounters an error.
 
         """

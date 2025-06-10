@@ -41,7 +41,8 @@ def main():
 
     Allows the user to exit the conversation by typing 'exit' or 'quit'.
 
-    Raises:
+    Raises
+    ------
         ValueError: If the 'GOOGLE_API_KEY' environment variable is not set
                     during the initialization of GeminiNLUService.
         Exception: Catches and reports any unexpected errors during the

@@ -70,10 +70,12 @@ class ActionExecutor:
         """Execute an action based on the given intent and entities.
 
         Args:
+        ----
             intent (str): The identified intent from the NLU service.
             entities (Dict[str, Any]): A dictionary of extracted entities.
 
         Returns:
+        -------
             str: A simple placeholder response string indicating the action
                  taken. In a real application, this would trigger actual
                  functionality and return a more meaningful response (e.g., a

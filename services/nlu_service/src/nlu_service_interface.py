@@ -30,9 +30,11 @@ class NLUServiceInterface(ABC):
         Use the NLU service to extract intent and entities.
 
         Args:
+        ----
             text: The user's input text to be processed.
 
         Returns:
+        -------
             A dictionary containing the extracted intent and entities,
             e.g., {"intent": "greet", "entities": {"name": "Viki"}}.
             The structure should be consistent across all implementations.
@@ -40,6 +42,7 @@ class NLUServiceInterface(ABC):
                 {"intent": "unknown", "entities": {"raw_query": text}}.
 
         Raises:
+        ------
             NLUProcessingError: If there's an error during NLU processing
             (e.g., API issues, invalid response).
 

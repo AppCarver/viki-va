@@ -28,7 +28,8 @@ Dependencies:
 - `google-genai` (The new SDK package name, installed via
   `pip install google-genai`)
 
-Raises:
+Raises
+------
     ValueError:
         If the GOOGLE_API_KEY environment variable is not set during
         initialization.
@@ -101,6 +102,7 @@ class GeminiNLUService(NLUServiceInterface):
         """Initialize the GeminiNLUService using the new Google Gen AI SDK client.
 
         Args:
+        ----
             model_name: The name of the Gemini model to use (e.g., "gemini-pro").
                         It will be passed as the 'model' keyword argument.
 
@@ -123,12 +125,15 @@ class GeminiNLUService(NLUServiceInterface):
         Use the NEW Google Gen AI SDK to extract intent and entities.
 
         Args:
+        ----
             text: The user's input text.
 
         Returns:
+        -------
             A dictionary containing the NLU result.
 
         Raises:
+        ------
             NLUProcessingError:
                 If there's an issue with the Gemini API call or response.
 
