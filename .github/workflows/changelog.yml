@@ -19,7 +19,7 @@ jobs:
           fetch-depth: 0 # Ensures full history for changelog generation
       - uses: TriPSs/conventional-changelog-action@v5
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.VIKI_PAT }}
           output-file: CHANGELOG.md
           skip-version-file: true
           git-push: false
