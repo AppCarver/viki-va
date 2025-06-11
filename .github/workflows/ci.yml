@@ -59,4 +59,3 @@ jobs:
         # This condition ensures the artifact is uploaded even if a previous step failed.
         # This is useful for debugging a failed test or coverage gate.
         if: always() # Always run this step, even if previous steps failed
-        run: mypy .
