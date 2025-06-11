@@ -113,8 +113,26 @@ addopts = [
     "--durations=10",   # Show slowest 10 tests
     "--cache-clear",    # Clear pytest cache before each run (useful for CI)
     "--no-header",      # Don't show the pytest header
+    "--cov=.", # Run coverage for the current directory
+    "--cov-report=term-missing", # Show missing lines in terminal
+    "--cov-report=html", # Generate HTML report
+    "--cov-fail-under=80", # Fail if overall coverage is below 80%
 ]
 
+[tool.coverage.run]
+source = ["./services/action_executor/src", "./services/input_processor/src", "./services/nlu_service/src"] # Explicitly tell coverage where your source code is
+branch = true # Enable branch coverage (useful, but might lower your initial percentage slightly)
+omit = [
+    "*/__init__.py", # Usually boilerplate, can be omitted
+    "*/tests/*", # Exclude test files from coverage report
+    "main.py", # If main.py is just a runner, you might omit it
+    # Add any other paths you genuinely don't need covered (e.g., config files, CLI entry points)
+]
+
+[tool.coverage.report]
+show_missing = true
+skip_empty = true
+fail_under = 80 # Fail if overall coverage is below 80%
 
 [tool.mypy]
 # Global default settings for mypy

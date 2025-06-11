@@ -50,3 +50,13 @@ jobs:
 
       - name: Run MyPy (Type Checking)
         run: mypy .
+  
+      - name: Upload Coverage Report (HTML)
+        uses: actions/upload-artifact@v4 # Use the upload-artifact action
+        with:
+          name: code-coverage-report # Name of the artifact
+          path: htmlcov/ # Path to the directory created by pytest-cov
+        # This condition ensures the artifact is uploaded even if a previous step failed.
+        # This is useful for debugging a failed test or coverage gate.
+        if: always() # Always run this step, even if previous steps failed
+        run: mypy .
