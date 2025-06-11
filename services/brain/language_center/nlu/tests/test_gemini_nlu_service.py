@@ -8,10 +8,12 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from services.nlu_service.src.gemini_nlu_service import (
+from services.brain.language_center.nlu.src.gemini_nlu_service import (
     GeminiNLUService,
 )
-from services.nlu_service.src.nlu_service_interface import NLUServiceInterface
+from services.brain.language_center.nlu.src.nlu_service_interface import (
+    NLUServiceInterface,
+)
 
 
 @pytest.fixture

@@ -19,11 +19,13 @@ import dotenv
 from services.action_executor.src.action_executor import (
     ActionExecutor,
 )
+from services.brain.language_center.nlu.src.gemini_nlu_service import (
+    GeminiNLUService,
+)
 from services.input_processor.src.input_processor import (
     InputProcessor,
     NLUProcessingError,
 )
-from services.nlu_service.src.gemini_nlu_service import GeminiNLUService
 
 dotenv.load_dotenv()
 
