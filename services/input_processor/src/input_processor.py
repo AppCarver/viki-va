@@ -59,7 +59,9 @@ from typing import Any  # <--- FIX: Add Dict for type hinting consistency
 import pytz  # <--- FIX: Import pytz for pytz.utc
 
 # Import the newly defined NLU Service Interface
-from services.nlu_service.src.nlu_service_interface import NLUServiceInterface
+from services.brain.language_center.nlu.src.nlu_service_interface import (
+    NLUServiceInterface,
+)
 
 
 # Define NLUProcessingError here.

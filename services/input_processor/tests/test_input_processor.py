@@ -7,11 +7,13 @@ from unittest.mock import Mock
 
 import pytest
 
+from services.brain.language_center.nlu.src.nlu_service_interface import (
+    NLUServiceInterface,
+)
 from services.input_processor.src.input_processor import (
     InputProcessor,
     NLUProcessingError,
 )
-from services.nlu_service.src.nlu_service_interface import NLUServiceInterface
 
 # Use a fixed UUID for consistent testing
 TEST_DEVICE_ID = uuid.UUID("a1b2c3d4-e5f6-7890-1234-567890abcdef")

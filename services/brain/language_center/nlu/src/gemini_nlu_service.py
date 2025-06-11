@@ -43,12 +43,14 @@ import json
 import os
 from typing import Any  # Added Optional for type hinting
 
-# CORRECTED IMPORT: Using the new SDK's 'from google import genai'
 from google import genai
+
+from services.brain.language_center.nlu.src.nlu_service_interface import (
+    NLUServiceInterface,
+)
 
 # Import NLUProcessingError from where it's currently defined
 from services.input_processor.src.input_processor import NLUProcessingError
-from services.nlu_service.src.nlu_service_interface import NLUServiceInterface
 
 
 class GeminiNLUService(NLUServiceInterface):
