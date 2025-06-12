@@ -140,6 +140,8 @@ python_version = "3.12" # Set this to match your target-version in Ruff (e.g., "
 warn_unused_ignores = true
 warn_redundant_casts = true
 warn_unreachable = true
+# Enable namespace packages. This is crucial for multi-level nested package structures.
+namespace_packages = true
 
 # Recommended general settings for robust checking
 disallow_untyped_defs = true       # Error if function has no type hints
