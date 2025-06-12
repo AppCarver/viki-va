@@ -139,7 +139,9 @@ def main() -> None:
             viki_nlg_output = language_center.generate_response(
                 dialogue_act=dialogue_act,
                 response_content=response_content,
-                conversation_id=session_device_id,
+                conversation_id=str(
+                    session_device_id
+                ),  # FIX APPLIED HERE: Converted UUID to string
                 user_id="user_viki_session",  # Dummy user ID for now
             )
             print(
