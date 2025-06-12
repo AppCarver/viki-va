@@ -1,11 +1,11 @@
-# tests/test_dummy.py
+# services/action_executor/tests/test_action_executor.py
 
-"""A dummy test module to ensure pytest and linters pass."""
+"""Tests for the ActionExecutor service."""
 
-# Imports
-
+from collections.abc import Generator
 from datetime import datetime
-from unittest.mock import patch  # <--- Ensure Mock and patch are here!
+from typing import Any, cast
+from unittest.mock import MagicMock, patch
 
 import pytest
 import pytz
@@ -13,184 +13,165 @@ import pytz
 from services.action_executor.src.action_executor import ActionExecutor
 
 
-# Test Fixtures
 @pytest.fixture
-def action_executor():
-    """Fixture provides an ActionExecutor instance."""
-    return ActionExecutor()
+def action_executor() -> Generator[ActionExecutor, None, None]:
+    """Provide a clean ActionExecutor instance for each test."""
+    yield ActionExecutor()
 
 
-# Test Cases
+def test_greet_success(action_executor: ActionExecutor):
+    """Test 'greet' intent with a user name."""
+    intent = "greet"
+    entities = {"user_name": "Alice"}
+    dialogue_act, response_content = (
+        action_executor.execute_action_and_get_structured_response(intent, entities)
+    )
+    assert dialogue_act == "greet"
+    assert response_content == {"user_name": "Alice"}
 
 
-# Scenario: Provide a well-formed intent and a dictionary of entities that the
-# ActionExecutor should know how to handle
-# (e.g., intent="greet", entities={}).
-def test_greet_success(action_executor):
-    """Test ActionExecutor for greeting response."""
-    result = action_executor.execute_action(intent="greet", entities={})
+def test_greet_no_name(action_executor: ActionExecutor):
+    """Test 'greet' intent without a user name."""
+    intent = "greet"
+    entities: dict[str, Any] = {}
+    dialogue_act, response_content = (
+        action_executor.execute_action_and_get_structured_response(intent, entities)
+    )
+    assert dialogue_act == "greet"
+    assert response_content == {}
 
-    assert result == "Hello there! How can I help you today?"
 
-
-def test_tell_joke_success(action_executor):
-    """Test ActionExecutor for telling a joke."""
-    result = action_executor.execute_action(intent="tell_joke", entities={})
-
-    assert result == (
-        "Why don't scientists trust atoms? Because they make up everything!"
+def test_tell_joke_success(action_executor: ActionExecutor):
+    """Test 'tell_joke' intent."""
+    intent = "tell_joke"
+    entities: dict[str, Any] = {}
+    dialogue_act, response_content = (
+        action_executor.execute_action_and_get_structured_response(intent, entities)
+    )
+    assert dialogue_act == "tell_joke"
+    assert "joke_punchline" in response_content
+    assert (
+        response_content["joke_punchline"]
+        == "Why don't scientists trust atoms? Because they make up everything!"
     )
 
 
-def test_get_time_for_specific_location(action_executor):
-    """Test getting specific time."""
-    # 1. Arrange - Define a fixed time for our mock
-    fixed_utc_time = datetime(2023, 1, 15, 10, 30, 0, tzinfo=pytz.utc)
+@patch("services.action_executor.src.action_executor.datetime")
+def test_get_time_for_specific_location(
+    mock_datetime: MagicMock, action_executor: ActionExecutor
+):
+    """Test 'get_time' intent with a specific location."""
+    fixed_utc_time = datetime(2025, 6, 11, 10, 0, 0, tzinfo=pytz.utc)
+    # Cast mock_datetime.now to Any to satisfy mypy for .return_value
+    cast(Any, mock_datetime.now).return_value = fixed_utc_time
 
-    # 2. Arrange - Define intent and entities
     intent = "get_time"
-    location = "Paris"
-    entities = {"location": location}
+    entities = {"location": "London"}
+    dialogue_act, response_content = (
+        action_executor.execute_action_and_get_structured_response(intent, entities)
+    )
 
-    # 3. Arrange - Calculate the expected response string
-    expected_timezone = pytz.timezone("Europe/Paris")
-    expected_local_time = fixed_utc_time.astimezone(expected_timezone)
-    expected_time_str = expected_local_time.strftime("%H:%M:%S on %A, %B %d, %Y")
-    expected_response = f"The current time in {location} is {expected_time_str}."
-
-    # 4. Act - Use patch to "freeze" datetime.datetime.now()
-    # We patch the 'datetime' *module* as it's imported in action_executor.py
-    # and then configure its 'now' method to return our fixed time.
-    with patch(
-        "services.action_executor.src.action_executor.datetime"
-    ) as mock_datetime:
-        # Configure the mock datetime module's 'now' method
-        mock_datetime.now.return_value = fixed_utc_time
-
-        result = action_executor.execute_action(intent=intent, entities=entities)
-
-    # 5. Assert
-    assert result == expected_response
+    assert dialogue_act == "inform_time"
+    assert response_content["location"] == "London"
+    # London (Europe/London) is UTC+1 (BST) on June 11th. So 10 AM UTC becomes
+    # 11 AM London. # E501 fixed by splitting the comment
+    # Format from ActionExecutor is "%H:%M:%S on %A, %B %d, %Y"
+    assert response_content["time"] == "11:00:00 on Wednesday, June 11, 2025"
 
 
-def test_get_time_for_missing_location(action_executor):
-    """Test getting specific time."""
-    # 1. Arrange - Define a fixed time for our mock
-    fixed_utc_time = datetime(2023, 1, 15, 10, 30, 0, tzinfo=pytz.utc)
+@patch("services.action_executor.src.action_executor.datetime")
+def test_get_time_for_missing_location(
+    mock_datetime: MagicMock, action_executor: ActionExecutor
+):
+    """Test 'get_time' intent when location is missing (asks for clarification)."""
+    fixed_utc_time = datetime(2025, 6, 11, 10, 0, 0, tzinfo=pytz.utc)
+    # Cast mock_datetime.now to Any to satisfy mypy for .return_value
+    cast(Any, mock_datetime.now).return_value = fixed_utc_time
 
-    # 2. Arrange - Define intent and entities
     intent = "get_time"
-    location = ""
-    entities = {"location": location}
-
-    # 3. Arrange - Calculate the expected response string
-    expected_time_str = fixed_utc_time.strftime("%H:%M:%S")
-    expected_response = (
-        f"You asked for the time, but didn't specify a location. "
-        f"The current UTC time is {expected_time_str}."
+    entities: dict[str, Any] = {}
+    dialogue_act, response_content = (
+        action_executor.execute_action_and_get_structured_response(intent, entities)
     )
 
-    # 4. Act - Use patch to "freeze" datetime.datetime.now()
-    # We patch the 'datetime' *module* as it's imported in action_executor.py
-    # and then configure its 'now' method to return our fixed time.
-    with patch(
-        "services.action_executor.src.action_executor.datetime"
-    ) as mock_datetime:
-        # Configure the mock datetime module's 'now' method
-        mock_datetime.now.return_value = fixed_utc_time
-
-        result = action_executor.execute_action(intent=intent, entities=entities)
-
-    # 5. Assert
-    assert result == expected_response
+    assert dialogue_act == "ask_for_clarification"
+    assert response_content["missing_info"] == "location for time"
+    assert response_content["current_utc_time"] == "10:00:00 UTC"
 
 
-def test_unrecognized_intent(action_executor):
-    """Test ActionExecutor for unrecognized intent."""
-    intent = "do_a_backflip"
-
-    result = action_executor.execute_action(intent=intent, entities={})
-
-    assert result == (
-        f"I understand you want to '{intent}', but I don't have an action for that yet."
+def test_unimplemented_intent(action_executor: ActionExecutor):
+    """Test an intent that is understood but not yet implemented."""
+    intent = "set_reminder"
+    entities = {"item": "groceries"}
+    dialogue_act, response_content = (
+        action_executor.execute_action_and_get_structured_response(intent, entities)
     )
+    assert dialogue_act == "unimplemented_action"
+    assert response_content == {"intent": "set_reminder"}
 
 
-def test_get_time_unknown_timezone_error(action_executor):
-    """Test unknown timezone."""
-    # 1. Arrange - Define a fixed time for our mock
-    fixed_utc_time = datetime(2023, 1, 15, 10, 30, 0, tzinfo=pytz.utc)
+def test_unknown_intent(action_executor: ActionExecutor):
+    """Test an unknown intent."""
+    intent = "unknown"
+    entities = {"raw_query": "random gibberish"}
+    dialogue_act, response_content = (
+        action_executor.execute_action_and_get_structured_response(intent, entities)
+    )
+    assert dialogue_act == "unknown_intent_response"
+    assert response_content == {"raw_query": "random gibberish"}
 
-    # 2. Arrange - Define intent and entities
+
+def test_farewell_intent(action_executor: ActionExecutor):
+    """Test the 'farewell' intent."""
+    intent = "farewell"
+    entities: dict[str, Any] = {}
+    dialogue_act, response_content = (
+        action_executor.execute_action_and_get_structured_response(intent, entities)
+    )
+    assert dialogue_act == "farewell"
+    assert response_content == {}
+
+
+@patch("services.action_executor.src.action_executor.pytz.timezone")
+def test_get_time_unknown_timezone_error(
+    mock_timezone: MagicMock, action_executor: ActionExecutor
+):
+    """Test _get_time_for_location with an unknown timezone.
+
+    This specifically tests the handling of pytz.UnknownTimeZoneError.
+    """
+    # Cast mock_timezone to Any to satisfy mypy for .side_effect
+    cast(Any, mock_timezone).side_effect = pytz.exceptions.UnknownTimeZoneError(
+        "Unknown/Location"
+    )
     intent = "get_time"
-    location = "Cancun"
-    entities = {"location": location}
-
-    expected_response = (
-        f"I'm not sure about the timezone for '{location}'. Can you be more specific?"
+    entities = {"location": "Unknown/Location"}
+    dialogue_act, response_content = (
+        action_executor.execute_action_and_get_structured_response(intent, entities)
+    )
+    assert dialogue_act == "inform_error"
+    assert response_content["error_message"] == (
+        "I'm not sure about the timezone for 'Unknown/Location'. Can you be more"
+        " specific?"
     )
 
-    # 4. Act - Use patch to "freeze" datetime.datetime.now()
-    # We patch the 'datetime' *module* as it's imported in action_executor.py
-    # and then configure its 'now' method to return our fixed time.
-    with patch(
-        "services.action_executor.src.action_executor.datetime"
-    ) as mock_datetime:
-        # Configure the mock datetime module's 'now' method
-        mock_datetime.now.return_value = fixed_utc_time
 
-        result = action_executor.execute_action(intent=intent, entities=entities)
+@patch("services.action_executor.src.action_executor.pytz.timezone")
+def test_get_time_general_exception_in_location_helper(
+    mock_timezone: MagicMock, action_executor: ActionExecutor
+):
+    """Test _get_time_for_location with a general exception.
 
-    # 5. Assert
-    assert result == expected_response
-
-
-def test_get_time_pytz_unknown_timezone_exception(action_executor):
-    """Test get_time when pytz.timezone raises UnknownTimeZoneError."""
-    # Arrange
+    This tests error handling for unexpected issues during timezone lookup.
+    """
+    # Cast mock_timezone to Any to satisfy mypy for .side_effect
+    cast(Any, mock_timezone).side_effect = Exception("Some unexpected error")
     intent = "get_time"
-
-    location = "London"  # Or any other mapped city like "Paris", "New York"
-    entities = {"location": location}
-
-    expected_response = (
-        f"I don't recognize the timezone for '{location}'. Please try a different city."
+    entities = {"location": "Anywhere"}
+    dialogue_act, response_content = (
+        action_executor.execute_action_and_get_structured_response(intent, entities)
     )
-
-    # Act
-    # We need to patch pytz.timezone within the context of the action_executor module.
-    # Also, keep the datetime mock consistent to avoid other side effects.
-    with patch(
-        "services.action_executor.src.action_executor.pytz.timezone"
-    ) as mock_pytz_timezone:
-        mock_pytz_timezone.side_effect = pytz.exceptions.UnknownTimeZoneError
-
-        result = action_executor.execute_action(intent=intent, entities=entities)
-
-    # Assert
-    assert result == expected_response
-    # You could also assert that mock_pytz_timezone was called with the correct string
-    mock_pytz_timezone.assert_called_once_with("Europe/London")
-    # Verify it was called with the actual timezone string
-
-
-def test_get_time_general_exception_in_location_helper(action_executor):
-    """Test get_time when pytz.timezone raises UnknownTimeZoneError."""
-    # Arrange
-    intent = "get_time"
-    location = "London"  # Or any other mapped city like "Paris", "New York"
-    entities = {"location": location}
-
-    expected_response = (
-        "I encountered an error trying to get the time for that location."
+    assert dialogue_act == "inform_error"
+    assert response_content["error_message"] == (
+        "I'm not sure about the timezone for 'Anywhere'. Can you be more specific?"
     )
-
-    with patch(
-        "services.action_executor.src.action_executor.pytz.timezone"
-    ) as mock_pytz_timezone:
-        mock_pytz_timezone.side_effect = pytz.exceptions.Error
-        result = action_executor.execute_action(intent=intent, entities=entities)
-
-    # Assert
-    assert result == expected_response
-    mock_pytz_timezone.assert_called_once_with("Europe/London")

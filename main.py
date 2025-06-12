@@ -19,9 +19,11 @@ import dotenv
 from services.action_executor.src.action_executor import (
     ActionExecutor,
 )
+from services.brain.language_center.nlg.src.gemini_nlg_service import GeminiNLGService
 from services.brain.language_center.nlu.src.gemini_nlu_service import (
     GeminiNLUService,
 )
+from services.brain.language_center.src.language_center import LanguageCenter
 from services.input_processor.src.input_processor import (
     InputProcessor,
     NLUProcessingError,
@@ -58,20 +60,28 @@ def main() -> None:
     session_device_id = uuid.uuid4()
 
     try:
-        # 1. Initialize the NLU Service (GeminiNLUService)
-        print(f"Initializing Gemini NLU Service with model: {gemini_model_name}...")
+        # 1. Initialize NLU and NLG services
         nlu_service = GeminiNLUService(model_name=gemini_model_name)
-        print("Gemini NLU Service initialized successfully.")
+        nlg_service = GeminiNLGService(model_name=gemini_model_name)
 
-        # 2. Initialize the Input Processor with the NLU Service
-        print("Initializing Input Processor...")
-        input_processor = InputProcessor(nlu_service=nlu_service)
-        print("Input Processor initialized successfully.")
+        # 2. Initialize the Language Center with both services
+        print("Initializing Language Center...")
+        language_center = LanguageCenter(
+            nlu_service=nlu_service,
+            nlg_service=nlg_service,
+            # short_term_memory_service=short_term_memory_instance
+            #       # If you fetch context here
+        )
+        print("Language Center initialized successfully.")
 
-        # 3. Initialize the Action Executor
-        print("Initializing Action Executor...")
-        action_executor = ActionExecutor()  # <--- ADD THIS LINE
-        print("Action Executor initialized successfully.")
+        # 3. Initialize the Input Processor with the Language Center
+        #    (or just NLU service)
+        # This depends on if InputProcessor specifically wants the NLU service
+        # or LanguageCenter
+        input_processor = InputProcessor(nlu_service=language_center.nlu_service)
+
+        # 4. Initialize Action Executor
+        action_executor = ActionExecutor()
 
     except ValueError as e:
         print(f"Configuration Error: {e}")
@@ -98,6 +108,7 @@ def main() -> None:
         try:
             # Process user input using the InputProcessor
             print("Processing input...")
+            # Input Processor calls language_center.understand_user_input internally
             nlu_result = input_processor.process_text_input(
                 user_input, session_device_id
             )
@@ -116,10 +127,28 @@ def main() -> None:
 
             # --- Call the Action Executor ---
             print("\n--- Viki's Response ---")
-            viki_response = action_executor.execute_action(
-                nlu_result.get("intent", "unknown"), nlu_result.get("entities", {})
+            # Action Executor provides structured data
+            dialogue_act, response_content = (
+                action_executor.execute_action_and_get_structured_response(
+                    nlu_result.get("intent", "unknown"), nlu_result.get("entities", {})
+                )
             )
-            print(f"Viki: {viki_response}")
+
+            # Main calls Language Center for NLG
+            print("\n--- Viki's Generated Response ---")
+            viki_nlg_output = language_center.generate_response(
+                dialogue_act=dialogue_act,
+                response_content=response_content,
+                conversation_id=session_device_id,
+                user_id="user_viki_session",  # Dummy user ID for now
+            )
+            print(
+                f"Viki: {
+                    viki_nlg_output.get(
+                        'generated_text', 'I could not generate a response.'
+                    )
+                }"
+            )
 
         except NLUProcessingError as e:
             print(f"Viki: I had trouble understanding that. NLU Error: {e}")
