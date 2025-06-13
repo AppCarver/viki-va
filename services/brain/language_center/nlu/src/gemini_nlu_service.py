@@ -39,6 +39,7 @@ Raises
 
 """
 
+import logging
 import os
 from typing import Any  # Added Optional for type hinting
 
@@ -52,6 +53,8 @@ from services.brain.language_center.nlu.src.nlu_service_interface import (
 # Import NLUProcessingError from where it's currently defined
 from services.input_processor.src.input_processor import NLUProcessingError
 from shared_libs.utils.llm.response_parser import extract_json_from_markdown_code_block
+
+logger = logging.getLogger(__name__)
 
 
 class GeminiNLUService(NLUServiceInterface):
@@ -126,7 +129,7 @@ class GeminiNLUService(NLUServiceInterface):
         # It picks up the API key from the env var.
         self.client = genai.Client()
         self.model_name = model_name
-        print(f"GeminiNLUService initialized with model: {self.model_name}")
+        logger.info(f"GeminiNLUService initialized with model: {self.model_name}")
 
     def process_nlu(self, text: str) -> dict[str, Any]:
         """Process the text.
@@ -148,7 +151,8 @@ class GeminiNLUService(NLUServiceInterface):
 
         """
         prompt = self.NLU_PROMPT_TEMPLATE.format(text=text)
-        print(f"Sending prompt to Gemini: {prompt}")
+        # logger.debug(f"Sending prompt to Gemini: {prompt}")
+        logger.debug("Processing user input for NLU: '%s'", text)
 
         try:
             response = self.client.models.generate_content(
@@ -168,7 +172,7 @@ class GeminiNLUService(NLUServiceInterface):
 
             raw_gemini_response_text: str = raw_gemini_response_text_or_none
 
-            print(f"DEBUG: Raw Gemini Response Text: '{raw_gemini_response_text}'")
+            logger.debug(f"Raw Gemini Response Text: '{raw_gemini_response_text}'")
 
             # --- INTEGRATION START ---
             # Use the shared response_parser to extract and parse the JSON.
@@ -181,11 +185,13 @@ class GeminiNLUService(NLUServiceInterface):
                 # If extract_json_from_markdown_code_block returns None,
                 # it means valid JSON couldn't be extracted or parsed.
                 # Treat this as an unknown intent with low confidence.
-                print(
-                    f"ERROR: Failed to parse valid JSON from Gemini response. "
-                    f"Response might be malformed or unparseable. "
-                    f"Original text: '{text}'"
+                logger.error(
+                    "Failed to parse valid JSON from Gemini response. "
+                    "Response might be malformed or unparseable. "
+                    "Original text: '%s'",
+                    raw_gemini_response_text,
                 )
+
                 return {
                     "intent": {"name": self.UNKNOWN_INTENT_NAME, "confidence": 0.0},
                     "entities": {},
@@ -234,5 +240,11 @@ class GeminiNLUService(NLUServiceInterface):
         except Exception as e:
             # This general exception handler catches any other issues, including
             # network errors during API calls or unexpected issues from the Gemini SDK.
-            print(f"ERROR: Gemini API call failed or an unexpected parsing error: {e}")
+            # OLD: logger.error(f"ERROR: Gemini API call failed or an unexpected
+            # parsing error: {e}")
+            logger.error(
+                "Gemini API call failed or an unexpected parsing error: %s",
+                e,
+                exc_info=True,
+            )
             raise NLUProcessingError(f"Gemini API call failed: {e}") from e
