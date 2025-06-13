@@ -34,6 +34,7 @@ Raises:
 """
 
 import json
+import logging
 import os
 from typing import Any
 
@@ -43,6 +44,8 @@ from services.brain.language_center.nlg.src.nlg_service_interface import (
     NLGServiceInterface,
 )
 from shared_libs.errors.errors import NLGGenerationError
+
+logger = logging.getLogger(__name__)
 
 
 class GeminiNLGService(NLGServiceInterface):
@@ -114,7 +117,7 @@ class GeminiNLGService(NLGServiceInterface):
             )
         self.client = genai.Client()
         self.model_name = model_name
-        print(f"GeminiNLGService initialized with model: {self.model_name}")
+        logger.info(f"GeminiNLGService initialized with model: {self.model_name}")
 
     def generate_response(
         self,

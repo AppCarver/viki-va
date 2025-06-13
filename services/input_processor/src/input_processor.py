@@ -52,6 +52,7 @@ Returns
 
 """
 
+import logging
 import uuid
 from datetime import datetime  # <--- FIX: Import datetime directly, remove UTC
 from typing import Any  # <--- FIX: Add Dict for type hinting consistency
@@ -62,6 +63,8 @@ import pytz  # <--- FIX: Import pytz for pytz.utc
 from services.brain.language_center.nlu.src.nlu_service_interface import (
     NLUServiceInterface,
 )
+
+logger = logging.getLogger(__name__)
 
 
 # Define NLUProcessingError here.
@@ -95,7 +98,7 @@ class InputProcessor:
         """
         self.nlu_service = nlu_service
         self.asr_service = asr_service
-        print("InputProcessor initialized.")
+        logger.info("InputProcessor initialized.")
 
     def process_text_input(self, text: str, device_id: uuid.UUID) -> dict[str, Any]:
         """Process text input, identifies intent, and extracts entities using the NLU.
@@ -117,7 +120,9 @@ class InputProcessor:
             user_id = self._get_or_create_user_id_for_device(device_id)
             timestamp = self._get_current_utc_timestamp()
 
-            print(f"Processing text input from device {device_id} at {timestamp}...")
+            logger.info(
+                f"Processing text input from device {device_id} at {timestamp}..."
+            )
 
             nlu_result = self._process_nlu(text)
             intent = nlu_result.get("intent", "unknown")
@@ -147,7 +152,7 @@ class InputProcessor:
         except NLUProcessingError as e:
             # Handle NLU-specific errors, provide fallback for unknown intent
             error_message = f"Input processing failed due to NLU: {e}"
-            print(f"ERROR: {error_message}")
+            logger.error("Input processing failed due to NLU: %s", e, exc_info=True)
             # Ensure user_id is set to device_id if it was valid before the NLU error
             # If the ValueError was caught, user_id would be None.
             # Here, we assume device_id was valid if we reached this point.
@@ -173,7 +178,9 @@ class InputProcessor:
         except ValueError as e:
             # Handle validation errors (e.g., invalid device_id format)
             error_message = f"Input processing failed due to validation: {e}"
-            print(f"ERROR: {error_message}")
+            logger.error(
+                "Input processing failed due to validation: %s", e, exc_info=True
+            )
             return {
                 "success": False,
                 "processed_text": text,
@@ -188,7 +195,11 @@ class InputProcessor:
         except Exception as e:
             # Catch any other unexpected errors
             error_message = f"An unexpected error occurred during input processing: {e}"
-            print(f"CRITICAL ERROR: {error_message}")
+            logger.error(
+                "An unexpected error occurred during input processing: %s",
+                e,
+                exc_info=True,
+            )
             # Attempt to get user_id if not set, or fall back to device_id
             try:
                 # In this specific path (general Exception), device_id *should* be valid
@@ -227,12 +238,12 @@ class InputProcessor:
         # For now, we'll just simulate a transcription for testing purposes.
         # In a real scenario, raw_audio_data would be sent to an ASR service.
         simulated_transcription = "What time is it in Tokyo?"  # Example for testing
-        print(
+        logger.info(
             f"Processing audio input from device {device_id} "
             f"at {self._get_current_utc_timestamp()}..."
         )
 
-        print(f"Simulated ASR Transcription: '{simulated_transcription}'")
+        logger.debug("Simulated ASR Transcription: '%s'", simulated_transcription)
         # --- End Dummy ASR Implementation ---
 
         return self.process_text_input(simulated_transcription, device_id)
@@ -265,7 +276,7 @@ class InputProcessor:
             raise ValueError(f"Invalid device_id format: {device_id}. Expected a UUID.")
         # Logic to map device_id to user_id goes here.
         # For simplicity, we'll assume a 1:1 mapping for now or create a new user.
-        print(f"Associating device {device_id} with a user_id...")
+        logger.info("Associating device %s with a user_id...", device_id)
         return device_id
 
     def _get_current_utc_timestamp(self) -> datetime:

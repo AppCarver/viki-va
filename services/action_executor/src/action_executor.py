@@ -6,10 +6,13 @@ can fulfill the user's request. It acts as a router, mapping recognized
 intents to specific actions within Viki's capabilities.
 """
 
+import logging
 from datetime import datetime, tzinfo
 from typing import Any
 
 import pytz
+
+logger = logging.getLogger(__name__)
 
 
 class ActionExecutor:
@@ -17,7 +20,7 @@ class ActionExecutor:
 
     def __init__(self) -> None:
         """Initialize the ActionExecutor."""
-        print("ActionExecutor initialized.")  # Consider replacing with logging
+        logger.info("ActionExecutor initialized.")  # Consider replacing with logging
 
     def _get_time_for_location(self, location: str) -> str:
         """Get the current time for a specified location."""
@@ -61,7 +64,7 @@ class ActionExecutor:
                 "Please try a different city."
             )
         except Exception as e:
-            print(f"ERROR in _get_time_for_location: {e}")  # Replace with logging
+            logger.error("ERROR in _get_time_for_location: %s", e, exc_info=True)
             return "I encountered an error trying to get the time for that location."
 
     # Renamed/Refactored from the previous 'execute_action'
@@ -82,9 +85,8 @@ class ActionExecutor:
                     Data needed by NLG to form the response.
 
         """
-        print(
-            f"DEBUG: ActionExecutor received intent: "
-            f"'{intent}' with entities: {entities}"
+        logger.debug(
+            f"ActionExecutor received intent: '{intent}' with entities: {entities}"
         )
 
         # Map intents to dialogue_acts and prepare response_content
