@@ -39,7 +39,6 @@ Raises
 
 """
 
-import json
 import os
 from typing import Any  # Added Optional for type hinting
 
@@ -52,6 +51,7 @@ from services.brain.language_center.nlu.src.nlu_service_interface import (
 
 # Import NLUProcessingError from where it's currently defined
 from services.input_processor.src.input_processor import NLUProcessingError
+from shared_libs.utils.llm.response_parser import extract_json_from_markdown_code_block
 
 
 class GeminiNLUService(NLUServiceInterface):
@@ -166,34 +166,48 @@ class GeminiNLUService(NLUServiceInterface):
                     "Gemini API returned an empty response (None)."
                 )
 
-            # MyPy now knows raw_gemini_response_text is definitely a str here.
             raw_gemini_response_text: str = raw_gemini_response_text_or_none
 
             print(f"DEBUG: Raw Gemini Response Text: '{raw_gemini_response_text}'")
 
-            # Remove Markdown code block wrappers
-            clean_response_text = raw_gemini_response_text.removeprefix("```json\n")
-            clean_response_text = clean_response_text.removesuffix("```\n")
-            clean_response_text = clean_response_text.strip()
+            # --- INTEGRATION START ---
+            # Use the shared response_parser to extract and parse the JSON.
+            # This function directly returns the parsed dictionary or None.
+            parsed_nlu_data: dict[str, Any] | None = (
+                extract_json_from_markdown_code_block(raw_gemini_response_text)
+            )
 
-            # Optional fallback: If it's still wrapped (e.g., without 'json'),
-            # try a generic markdown code block strip.
-            if clean_response_text.startswith("```") and clean_response_text.endswith(
-                "```"
-            ):
-                clean_response_text = clean_response_text.strip("`").strip()
-            print(f"DEBUG: Cleaned Gemini Response Text: '{clean_response_text}'")
+            if parsed_nlu_data is None:
+                # If extract_json_from_markdown_code_block returns None,
+                # it means valid JSON couldn't be extracted or parsed.
+                # Treat this as an unknown intent with low confidence.
+                print(
+                    f"ERROR: Failed to parse valid JSON from Gemini response. "
+                    f"Response might be malformed or unparseable. "
+                    f"Original text: '{text}'"
+                )
+                return {
+                    "intent": {"name": self.UNKNOWN_INTENT_NAME, "confidence": 0.0},
+                    "entities": {},
+                    "original_text": text,
+                }
+            # --- INTEGRATION END ---
 
-            parsed_nlu_data = json.loads(clean_response_text)
+            # Now 'parsed_nlu_data' is guaranteed to be a dictionary if we reach here,
+            # so remove the old redundant stripping and json.loads call.
+            # The 'print' statement for "Cleaned Gemini Response Text"
+            # can also be removed
+            # or modified, as the parsing utility handles its own prints.
 
-            # Validate the essential keys are present (fixed line length)
+            # Validate the essential keys are present
             if (
                 not isinstance(parsed_nlu_data, dict)
                 or "intent" not in parsed_nlu_data
                 or "entities" not in parsed_nlu_data
             ):
                 raise NLUProcessingError(
-                    "Gemini response missing 'intent' or 'entities' keys."
+                    "Gemini response missing 'intent' or 'entities' keys "
+                    f"after parsing. Parsed: {parsed_nlu_data}"
                 )
 
             # --- Extract and Process Intent/Entities ---
@@ -201,13 +215,13 @@ class GeminiNLUService(NLUServiceInterface):
             entities: dict[str, Any] = parsed_nlu_data.get("entities", {})
 
             #  -- Confidence Score Logic ---
-            # Assign confidence based on wheterh the intent is identified as "unknown"
+            # Assign confidence based on whether the intent is identified as "unknown"
             confidence_score: float
             if intent_name == self.UNKNOWN_INTENT_NAME:
                 confidence_score = 0.2  # Low confidence for unknown intents
             else:
                 confidence_score = 0.95  # High confidence for recognized intents
-            # End Confidence Score logic ---0
+            # End Confidence Score logic ---
 
             # --- Construct the final NLU data output ---
             nlu_data_output = {
@@ -217,12 +231,8 @@ class GeminiNLUService(NLUServiceInterface):
             }
             return nlu_data_output
 
-        except json.JSONDecodeError:
-            # On JSON decode error, return unknown intent with 0.0 confidence
-            return {
-                "intent": {"name": self.UNKNOWN_INTENT_NAME, "confidence": 0.0},
-                "entities": {},
-                "original_text": text,
-            }
         except Exception as e:
+            # This general exception handler catches any other issues, including
+            # network errors during API calls or unexpected issues from the Gemini SDK.
+            print(f"ERROR: Gemini API call failed or an unexpected parsing error: {e}")
             raise NLUProcessingError(f"Gemini API call failed: {e}") from e
