@@ -16,6 +16,8 @@ It specifically verifies:
     - General API call failures.
 - Correct interaction with the `extract_json_from_markdown_code_block`
   utility for robust parsing.
+- **Ensuring the `raw_query` entity is present for "unknown" intents,
+  even if Gemini omits it.**
 
 Mocks are used for the `google.genai.Client` to simulate API responses
 without making actual network calls, ensuring tests are fast and reliable.
@@ -88,7 +90,10 @@ def test_process_nlu_successful(gemini_nlu_service, mock_genai_client):
 
 
 def test_process_nlu_unknown_intent(gemini_nlu_service, mock_genai_client):
-    """Tests NLU processing for an unknown intent, including markdown wrapper."""
+    """Tests NLU processing for an unknown intent, including markdown wrapper.
+
+    Gemini is mocked to provide raw_query in this case.
+    """
     test_text = "Random gibberish that makes no sense."
     # Simulate Gemini response with markdown and 'json' tag for unknown intent
     gemini_raw_response = (
@@ -115,6 +120,34 @@ def test_process_nlu_unknown_intent(gemini_nlu_service, mock_genai_client):
         "original_text": test_text,
     }
     assert result == expected_result
+
+
+# --- NEW TEST CASE FOR ACCEPTANCE CRITERIA ---
+def test_process_nlu_adds_raw_query_for_unknown_intent_if_gemini_omits(
+    gemini_nlu_service, mock_genai_client
+):
+    """Test process_nlu adds raw_query if Gemini returns unknown intent without it."""
+    test_text = "What is this random query about?"
+    # Simulate Gemini response with unknown intent but MISSING raw_query entity
+    gemini_raw_response = '```json\n{"intent": "unknown", "entities": {}}\n```'
+    mock_genai_client.models.generate_content.return_value.text = gemini_raw_response
+
+    result = gemini_nlu_service.process_nlu(test_text)
+
+    mock_genai_client.models.generate_content.assert_called_once()
+
+    expected_result = {
+        "intent": {
+            "name": gemini_nlu_service.UNKNOWN_INTENT_NAME,
+            "confidence": 0.2,
+        },
+        "entities": {"raw_query": test_text},  # Assert that raw_query was added
+        "original_text": test_text,
+    }
+    assert result == expected_result
+
+
+# --- END NEW TEST CASE ---
 
 
 def test_process_nlu_no_json_tag_in_markdown(gemini_nlu_service, mock_genai_client):
@@ -156,7 +189,10 @@ def test_process_nlu_json_with_surrounding_text(gemini_nlu_service, mock_genai_c
 def test_process_nlu_malformed_json_in_markdown_block(
     gemini_nlu_service, mock_genai_client
 ):
-    """Tests NLU when Gemini returns malformed JSON within a markdown block."""
+    """Tests NLU when Gemini returns malformed JSON within a markdown block.
+
+    Should now include raw_query in entities for unknown intent.
+    """
     test_text = "Malformed JSON test"
     # The markdown fences are present, but the JSON itself is invalid inside
     gemini_raw_response = (
@@ -167,13 +203,13 @@ def test_process_nlu_malformed_json_in_markdown_block(
     result = gemini_nlu_service.process_nlu(test_text)
 
     # Assert that it returns the unknown intent with 0.0 confidence,
-    # as the parser should fail to extract valid JSON.
+    # and now includes raw_query as the parser failed to extract valid JSON.
     expected_result = {
         "intent": {
             "name": gemini_nlu_service.UNKNOWN_INTENT_NAME,
             "confidence": 0.0,
         },
-        "entities": {},
+        "entities": {"raw_query": test_text},  # MODIFIED: raw_query added here
         "original_text": test_text,
     }
     assert result == expected_result
@@ -188,7 +224,10 @@ def test_process_nlu_malformed_json_in_markdown_block(
 
 
 def test_process_nlu_json_decode_error(gemini_nlu_service, mock_genai_client):
-    """Tests NLU processing when Gemini returns malformed JSON (not in markdown)."""
+    """Tests NLU processing when Gemini returns malformed JSON (not in markdown).
+
+    Should now include raw_query in entities for unknown intent.
+    """
     test_text = "This response is not JSON"
     mock_genai_client.models.generate_content.return_value.text = test_text
 
@@ -201,7 +240,7 @@ def test_process_nlu_json_decode_error(gemini_nlu_service, mock_genai_client):
             "name": gemini_nlu_service.UNKNOWN_INTENT_NAME,
             "confidence": 0.0,
         },
-        "entities": {},
+        "entities": {"raw_query": test_text},  # MODIFIED: raw_query added here
         "original_text": test_text,
     }
     assert result == expected_result
