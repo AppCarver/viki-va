@@ -34,7 +34,7 @@ from services.input_processor.src.input_processor import (
 dotenv.load_dotenv()
 
 
-def configure_application_logging():
+def configure_application_logging() -> None:
     """Set up the global logging configuration for the entire Viki VA application.
 
     This function should be called once at application startup.
