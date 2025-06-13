@@ -44,6 +44,7 @@ import os
 from typing import Any  # Added Optional for type hinting
 
 from google import genai
+from google.genai import types
 
 from services.brain.language_center.nlu.src.nlu_service_interface import (
     NLUServiceInterface,
@@ -59,6 +60,12 @@ class GeminiNLUService(NLUServiceInterface):
     Uses Google's NEW Gen AI SDK for Natural Language Understanding (NLU).
 
     """
+
+    # Define the UNKNOWN_INTENT_NAME constant here,
+    # specific to this implementation.
+    # It aligns with the "unknown" intent string
+    # expected by the interface's contract.
+    UNKNOWN_INTENT_NAME: str = "unknown"
 
     # The NLU prompt template specific to Gemini,
     # defining how to interact with the model.
@@ -141,12 +148,17 @@ class GeminiNLUService(NLUServiceInterface):
 
         """
         prompt = self.NLU_PROMPT_TEMPLATE.format(text=text)
+        print(f"Sending prompt to Gemini: {prompt}")
 
         try:
             response = self.client.models.generate_content(
-                model=self.model_name, contents=[prompt]
+                model=self.model_name,
+                contents=[prompt],
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json", temperature=0.0
+                ),
             )
-            # FIX: Introduce a new variable to safely narrow the type
+
             raw_gemini_response_text_or_none: str | None = response.text
 
             if raw_gemini_response_text_or_none is None:
@@ -172,23 +184,45 @@ class GeminiNLUService(NLUServiceInterface):
                 clean_response_text = clean_response_text.strip("`").strip()
             print(f"DEBUG: Cleaned Gemini Response Text: '{clean_response_text}'")
 
-            nlu_data = json.loads(clean_response_text)
+            parsed_nlu_data = json.loads(clean_response_text)
 
             # Validate the essential keys are present (fixed line length)
             if (
-                not isinstance(nlu_data, dict)
-                or "intent" not in nlu_data
-                or "entities" not in nlu_data
+                not isinstance(parsed_nlu_data, dict)
+                or "intent" not in parsed_nlu_data
+                or "entities" not in parsed_nlu_data
             ):
                 raise NLUProcessingError(
                     "Gemini response missing 'intent' or 'entities' keys."
                 )
 
-            return nlu_data
+            # --- Extract and Process Intent/Entities ---
+            intent_name: str = parsed_nlu_data.get("intent", self.UNKNOWN_INTENT_NAME)
+            entities: dict[str, Any] = parsed_nlu_data.get("entities", {})
 
-        except json.JSONDecodeError as e:
-            raise NLUProcessingError(
-                f"Failed to parse Gemini response as JSON: {e}"
-            ) from e
+            #  -- Confidence Score Logic ---
+            # Assign confidence based on wheterh the intent is identified as "unknown"
+            confidence_score: float
+            if intent_name == self.UNKNOWN_INTENT_NAME:
+                confidence_score = 0.2  # Low confidence for unknown intents
+            else:
+                confidence_score = 0.95  # High confidence for recognized intents
+            # End Confidence Score logic ---0
+
+            # --- Construct the final NLU data output ---
+            nlu_data_output = {
+                "intent": {"name": intent_name, "confidence": confidence_score},
+                "entities": entities,
+                "original_text": text,
+            }
+            return nlu_data_output
+
+        except json.JSONDecodeError:
+            # On JSON decode error, return unknown intent with 0.0 confidence
+            return {
+                "intent": {"name": self.UNKNOWN_INTENT_NAME, "confidence": 0.0},
+                "entities": {},
+                "original_text": text,
+            }
         except Exception as e:
             raise NLUProcessingError(f"Gemini API call failed: {e}") from e
