@@ -41,7 +41,7 @@ Raises
 
 import logging
 import os
-from typing import Any  # Added Optional for type hinting
+from typing import Any
 
 from google import genai
 from google.genai import types
@@ -110,7 +110,7 @@ class GeminiNLUService(NLUServiceInterface):
     User Input: {text}
     """
 
-    def __init__(self, model_name: str = "gemini-pro") -> None:  # FIX: Add -> None
+    def __init__(self, model_name: str = "gemini-pro") -> None:
         """Initialize the GeminiNLUService using the new Google Gen AI SDK client.
 
         Args:
@@ -151,7 +151,6 @@ class GeminiNLUService(NLUServiceInterface):
 
         """
         prompt = self.NLU_PROMPT_TEMPLATE.format(text=text)
-        # logger.debug(f"Sending prompt to Gemini: {prompt}")
         logger.debug("Processing user input for NLU: '%s'", text)
 
         try:
@@ -174,51 +173,52 @@ class GeminiNLUService(NLUServiceInterface):
 
             logger.debug(f"Raw Gemini Response Text: '{raw_gemini_response_text}'")
 
-            # --- INTEGRATION START ---
             # Use the shared response_parser to extract and parse the JSON.
-            # This function directly returns the parsed dictionary or None.
             parsed_nlu_data: dict[str, Any] | None = (
                 extract_json_from_markdown_code_block(raw_gemini_response_text)
             )
 
             if parsed_nlu_data is None:
-                # If extract_json_from_markdown_code_block returns None,
-                # it means valid JSON couldn't be extracted or parsed.
-                # Treat this as an unknown intent with low confidence.
                 logger.error(
                     "Failed to parse valid JSON from Gemini response. "
                     "Response might be malformed or unparseable. "
                     "Original text: '%s'",
                     raw_gemini_response_text,
                 )
-
+                # Ensure original_text is still passed for context
                 return {
                     "intent": {"name": self.UNKNOWN_INTENT_NAME, "confidence": 0.0},
-                    "entities": {},
+                    "entities": {"raw_query": text},
                     "original_text": text,
                 }
-            # --- INTEGRATION END ---
 
-            # Now 'parsed_nlu_data' is guaranteed to be a dictionary if we reach here,
-            # so remove the old redundant stripping and json.loads call.
-            # The 'print' statement for "Cleaned Gemini Response Text"
-            # can also be removed
-            # or modified, as the parsing utility handles its own prints.
-
-            # Validate the essential keys are present
-            if (
-                not isinstance(parsed_nlu_data, dict)
-                or "intent" not in parsed_nlu_data
-                or "entities" not in parsed_nlu_data
-            ):
+            # Validate essential keys are present in the parsed data.
+            # MyPy correctly understands parsed_nlu_data is a dict here because of the
+            # 'if parsed_nlu_data is None:' check above.
+            if "intent" not in parsed_nlu_data or "entities" not in parsed_nlu_data:
                 raise NLUProcessingError(
                     "Gemini response missing 'intent' or 'entities' keys "
                     f"after parsing. Parsed: {parsed_nlu_data}"
                 )
 
             # --- Extract and Process Intent/Entities ---
+            # These are the *only* assignments for intent_name and entities.
+            # MyPy will no longer complain about redefinition here.
             intent_name: str = parsed_nlu_data.get("intent", self.UNKNOWN_INTENT_NAME)
             entities: dict[str, Any] = parsed_nlu_data.get("entities", {})
+
+            # --- NEW LOGIC: Ensure raw_query for UNKNOWN_INTENT_NAME ---
+            # The 'if not isinstance(entities, dict):' check is removed.
+            # It's unnecessary because .get("entities", {})
+            # guarantees 'entities' is a dict,
+            # making the previous logger.debug statement reachable again
+            # (now implicitly gone).
+            if intent_name == self.UNKNOWN_INTENT_NAME:
+                # Add 'raw_query' if it's not already present
+                if "raw_query" not in entities:
+                    logger.debug("Adding 'raw_query' entity for unknown intent.")
+                    entities["raw_query"] = text
+            # --- END NEW LOGIC ---
 
             #  -- Confidence Score Logic ---
             # Assign confidence based on whether the intent is identified as "unknown"
@@ -238,10 +238,6 @@ class GeminiNLUService(NLUServiceInterface):
             return nlu_data_output
 
         except Exception as e:
-            # This general exception handler catches any other issues, including
-            # network errors during API calls or unexpected issues from the Gemini SDK.
-            # OLD: logger.error(f"ERROR: Gemini API call failed or an unexpected
-            # parsing error: {e}")
             logger.error(
                 "Gemini API call failed or an unexpected parsing error: %s",
                 e,
