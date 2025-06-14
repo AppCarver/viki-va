@@ -24,10 +24,16 @@ from services.brain.language_center.nlu.src.gemini_nlu_service import (
     GeminiNLUService,
 )
 from services.brain.language_center.src.language_center import LanguageCenter
+from services.brain.pre_forntal_cortex.src.pre_frontal_cortex import PrefrontalCortex
+
+## NEW CODE ##
+from services.brain.short_term_mem.src.short_term_memory import ShortTermMemory
 from services.input_processor.src.input_processor import (
     InputProcessor,
     NLUProcessingError,
 )
+
+## END NEW CODE ##
 
 dotenv.load_dotenv()
 
@@ -85,6 +91,8 @@ def main() -> None:
 
     # Generate a dummy device ID for this session
     session_device_id = uuid.uuid4()
+    # For a single session, we'll use a consistent user_id
+    session_user_id = uuid.uuid4()  ## NEW CODE ##
 
     try:
         # 1. Initialize NLU and NLG services
@@ -102,13 +110,21 @@ def main() -> None:
         main_logger.info("Language Center initialized successfully.")
 
         # 3. Initialize the Input Processor with the Language Center
-        #    (or just NLU service)
-        # This depends on if InputProcessor specifically wants the NLU service
-        # or LanguageCenter
         input_processor = InputProcessor(nlu_service=language_center.nlu_service)
 
         # 4. Initialize Action Executor
         action_executor = ActionExecutor()
+
+        ## NEW CODE: Initialize ShortTermMemory and PrefrontalCortex ##
+        short_term_memory = ShortTermMemory()
+        prefrontal_cortex = PrefrontalCortex(
+            short_term_memory=short_term_memory,
+            action_executor=action_executor,
+        )
+        main_logger.info(
+            "ShortTermMemory, ActionExecutor, and PrefrontalCortex initialized."
+        )
+        ## END NEW CODE ##
 
     except ValueError as e:
         main_logger.error("Configuration Error: %s", e, exc_info=True)
@@ -129,6 +145,10 @@ def main() -> None:
     main_logger.info("Type 'exit' or 'quit' to end the conversation.")
 
     # --- Main Interaction Loop ---
+    # We'll use the session_device_id as the
+    # conversation_id for simplicity in this demo.
+    conversation_id_for_session = session_device_id  ## NEW CODE ##
+
     while True:
         user_input = input("\nYou: ")
 
@@ -137,9 +157,9 @@ def main() -> None:
             break
 
         try:
-            # Process user input using the InputProcessor
             main_logger.info("Processing input...")
-            # Input Processor calls language_center.understand_user_input internally
+            # Get the NLU result from the InputProcessor.
+            # InputProcessor.process_text_input returns the NLU result directly.
             nlu_result = input_processor.process_text_input(
                 user_input, session_device_id
             )
@@ -153,60 +173,47 @@ def main() -> None:
                     f"  Error Message: {nlu_result.get('message', 'N/A')}"
                 )
 
-            # --- Call the Action Executor ---
-            main_logger.debug("\n--- Viki's Action Execution ---")
-            # Action Executor now provides a structured dictionary response
-            action_executor_response = (
-                action_executor.execute_action_and_get_structured_response(
-                    nlu_result.get("intent", "unknown"), nlu_result.get("entities", {})
-                )
+            ## MODIFIED CODE: Pass NLU result to PrefrontalCortex ##
+            main_logger.debug("\n--- Viki's Dialogue Management (PrefrontalCortex) ---")
+
+            # Generate a turn_id for the current interaction
+            current_turn_id = uuid.uuid4()
+
+            pfc_response = prefrontal_cortex.process_dialogue_turn(
+                turn_id=current_turn_id,
+                conversation_id=conversation_id_for_session,
+                user_id=session_user_id,
+                processed_text=user_input,  # Use the raw user input here
+                nlu_results=nlu_result,  # Pass the NLU results directly
             )
 
-            # Process the structured response from Action Executor
-            if action_executor_response.get("success"):
-                # Extract dialogue_act and response_content from result_data
-                # We assume dialogue_act is now passed within result_data
-                # for clarity
-                dialogue_act = action_executor_response["result_data"].get(
-                    "dialogue_act"
-                )
-                response_content = action_executor_response["result_data"]
+            # Check if PrefrontalCortex successfully processed the turn
+            if pfc_response["success"]:
+                va_response_text = pfc_response["va_response_text"]
+                action_taken = pfc_response["action_taken"]
+                new_dialogue_state = pfc_response["new_dialogue_state"]
 
-                # --- Direct Output for Simple Actions (for immediate testing) ---
-                # This allows Viki to speak directly if ActionExecutor already has
-                # a message.
-                if "message" in response_content:
-                    main_logger.info(
-                        f"Viki (ActionExecutor direct): {response_content['message']}"
-                    )
-                    continue  # Skip NLG for direct message to see immediate output
+                main_logger.debug(f"  Action Taken: {action_taken}")
+                main_logger.debug(f"  New Dialogue State: {new_dialogue_state}")
 
-                # Main calls Language Center for NLG
-                main_logger.debug("\n--- Viki's Generated Response (via NLG) ---")
-                viki_nlg_output = language_center.generate_response(
-                    dialogue_act=dialogue_act,
-                    response_content=response_content,
-                    conversation_id=str(session_device_id),
-                    user_id="user_viki_session",  # Dummy user ID for now
-                )
-                main_logger.debug(
-                    f"Viki (NLG): {
-                        viki_nlg_output.get(
-                            'generated_text', 'I could not generate a response.'
-                        )
-                    }"
-                )
+                # --- Original NLG call from ActionExecutor is now managed by PFC logic
+                # For our current PFC implementation, va_response_text is already the
+                # final text.
+                # In the future, PFC might return dialogue_act + response_content,
+                # and main.py would then call language_center.generate_response.
+                # For now, we'll directly print PFC's va_response_text.
+
+                main_logger.info(f"Viki: {va_response_text}")
+
             else:
-                # Handle cases where Action Executor reports an error
-                error_info = action_executor_response.get("error", {})
-                error_code = error_info.get("code", "UNKNOWN_ERROR")
-                error_message = error_info.get(
-                    "message", "An unexpected action error occurred."
+                # Handle cases where PrefrontalCortex reports an error
+                error_message = pfc_response.get(
+                    "error", "An unexpected error occurred in PrefrontalCortex."
                 )
-                main_logger.error(
-                    f"ActionExecutor Error [{error_code}]: {error_message}"
-                )
-                main_logger.info(f"Viki: {error_message}")
+                main_logger.error(f"PrefrontalCortex Error: {error_message}")
+                main_logger.info(f"Viki: {error_message} Please try again.")
+
+            ## END MODIFIED CODE ##
 
         except NLUProcessingError as e:
             main_logger.error(
@@ -214,11 +221,12 @@ def main() -> None:
                 e,
                 exc_info=True,
             )
+            main_logger.info("Viki: I'm sorry, I couldn't understand your input.")
         except Exception as e:
             main_logger.error(
                 "Viki: An unexpected error occurred: %s", e, exc_info=True
             )
-            main_logger.info("Please try again.")
+            main_logger.info("Viki: Something went wrong. Please try again.")
 
 
 if __name__ == "__main__":
