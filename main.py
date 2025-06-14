@@ -13,6 +13,7 @@ Gemini API access. This is typically loaded from a .env file.
 import logging
 import sys
 import uuid
+from unittest.mock import MagicMock
 
 import dotenv
 
@@ -92,7 +93,7 @@ def main() -> None:
     # Generate a dummy device ID for this session
     session_device_id = uuid.uuid4()
     # For a single session, we'll use a consistent user_id
-    session_user_id = uuid.uuid4()  ## NEW CODE ##
+    session_user_id = uuid.uuid4()
 
     try:
         # 1. Initialize NLU and NLG services
@@ -117,9 +118,12 @@ def main() -> None:
 
         ## NEW CODE: Initialize ShortTermMemory and PrefrontalCortex ##
         short_term_memory = ShortTermMemory()
+        long_term_memory = MagicMock()
+
         prefrontal_cortex = PrefrontalCortex(
             short_term_memory=short_term_memory,
             action_executor=action_executor,
+            long_term_memory=long_term_memory,
         )
         main_logger.info(
             "ShortTermMemory, ActionExecutor, and PrefrontalCortex initialized."
@@ -147,7 +151,7 @@ def main() -> None:
     # --- Main Interaction Loop ---
     # We'll use the session_device_id as the
     # conversation_id for simplicity in this demo.
-    conversation_id_for_session = session_device_id  ## NEW CODE ##
+    conversation_id_for_session = session_device_id
 
     while True:
         user_input = input("\nYou: ")
