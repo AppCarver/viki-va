@@ -26,7 +26,10 @@ class PrefrontalCortex:
     action_executor: ActionExecutor
 
     def __init__(
-        self, short_term_memory: ShortTermMemory, action_executor: ActionExecutor
+        self,
+        short_term_memory: ShortTermMemory,
+        action_executor: ActionExecutor,
+        long_term_memory: Any,
     ) -> None:
         """Initialize the PrefrontalCortex component.
 
@@ -36,6 +39,7 @@ class PrefrontalCortex:
         # --- CORRECTED LINES BELOW ---
         self.short_term_memory = short_term_memory  # Assign the injected instance
         self.action_executor = action_executor  # Assign the injected instance
+        self.long_term_memory = long_term_memory  # Assign the injected instance
         self.logger = logger  # Initialize your logger
         self.low_confidence_threshold = 0.4  # Re-add this threshold
         # --- END CORRECTED LINES ---
