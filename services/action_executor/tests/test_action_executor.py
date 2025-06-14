@@ -19,39 +19,66 @@ def action_executor() -> Generator[ActionExecutor, None, None]:
     yield ActionExecutor()
 
 
+# --- New Tests for get_name intent ---
+def test_get_name_success(action_executor: ActionExecutor):
+    """Test 'get_name' intent successfully returns Viki's name."""
+    intent = "get_name"
+    entities: dict[str, Any] = {}
+    response = action_executor.execute_action_and_get_structured_response(
+        intent, entities
+    )
+    assert response["success"] is True
+    assert response["error"] is None
+    assert response["result_data"]["dialogue_act"] == "inform_name"
+    assert response["result_data"]["viki_name"] == "Viki"
+    assert response["result_data"]["message"] == "My name is Viki."
+
+
+# --- Tests for existing intents with updated assertions for new structure ---
 def test_greet_success(action_executor: ActionExecutor):
     """Test 'greet' intent with a user name."""
     intent = "greet"
     entities = {"user_name": "Alice"}
-    dialogue_act, response_content = (
-        action_executor.execute_action_and_get_structured_response(intent, entities)
+    response = action_executor.execute_action_and_get_structured_response(
+        intent, entities
     )
-    assert dialogue_act == "greet"
-    assert response_content == {"user_name": "Alice"}
+    assert response["success"] is True
+    assert response["error"] is None
+    assert response["result_data"]["dialogue_act"] == "greet"
+    assert response["result_data"]["user_name"] == "Alice"
+    assert response["result_data"]["message"] == "Hello Alice!"
 
 
 def test_greet_no_name(action_executor: ActionExecutor):
     """Test 'greet' intent without a user name."""
     intent = "greet"
     entities: dict[str, Any] = {}
-    dialogue_act, response_content = (
-        action_executor.execute_action_and_get_structured_response(intent, entities)
+    response = action_executor.execute_action_and_get_structured_response(
+        intent, entities
     )
-    assert dialogue_act == "greet"
-    assert response_content == {}
+    assert response["success"] is True
+    assert response["error"] is None
+    assert response["result_data"]["dialogue_act"] == "greet"
+    assert response["result_data"]["user_name"] is None
+    assert response["result_data"]["message"] == "Hello!"
 
 
 def test_tell_joke_success(action_executor: ActionExecutor):
     """Test 'tell_joke' intent."""
     intent = "tell_joke"
     entities: dict[str, Any] = {}
-    dialogue_act, response_content = (
-        action_executor.execute_action_and_get_structured_response(intent, entities)
+    response = action_executor.execute_action_and_get_structured_response(
+        intent, entities
     )
-    assert dialogue_act == "tell_joke"
-    assert "joke_punchline" in response_content
+    assert response["success"] is True
+    assert response["error"] is None
+    assert response["result_data"]["dialogue_act"] == "tell_joke"
     assert (
-        response_content["joke_punchline"]
+        response["result_data"]["joke_punchline"]
+        == "Why don't scientists trust atoms? Because they make up everything!"
+    )
+    assert (
+        response["result_data"]["message"]
         == "Why don't scientists trust atoms? Because they make up everything!"
     )
 
@@ -67,16 +94,18 @@ def test_get_time_for_specific_location(
 
     intent = "get_time"
     entities = {"location": "London"}
-    dialogue_act, response_content = (
-        action_executor.execute_action_and_get_structured_response(intent, entities)
+    response = action_executor.execute_action_and_get_structured_response(
+        intent, entities
     )
 
-    assert dialogue_act == "inform_time"
-    assert response_content["location"] == "London"
-    # London (Europe/London) is UTC+1 (BST) on June 11th. So 10 AM UTC becomes
-    # 11 AM London. # E501 fixed by splitting the comment
-    # Format from ActionExecutor is "%H:%M:%S on %A, %B %d, %Y"
-    assert response_content["time"] == "11:00:00 on Wednesday, June 11, 2025"
+    assert response["success"] is True
+    assert response["error"] is None
+    assert response["result_data"]["dialogue_act"] == "inform_time"
+    assert response["result_data"]["location"] == "London"
+    assert response["result_data"]["time"] == ("11:00:00 on Wednesday, June 11, 2025")
+    assert response["result_data"]["message"] == (
+        "The current time in London is 11:00:00 on Wednesday, June 11, 2025."
+    )
 
 
 @patch("services.action_executor.src.action_executor.datetime")
@@ -90,88 +119,137 @@ def test_get_time_for_missing_location(
 
     intent = "get_time"
     entities: dict[str, Any] = {}
-    dialogue_act, response_content = (
-        action_executor.execute_action_and_get_structured_response(intent, entities)
+    response = action_executor.execute_action_and_get_structured_response(
+        intent, entities
     )
 
-    assert dialogue_act == "ask_for_clarification"
-    assert response_content["missing_info"] == "location for time"
-    assert response_content["current_utc_time"] == "10:00:00 UTC"
+    assert response["success"] is False
+    assert response["result_data"] is None
+    assert response["error"]["code"] == "MISSING_PARAMETER"
+    assert response["error"]["message"] == "Please specify a location to get the time."
+    assert (
+        response["error"]["details"]
+        == "Missing 'location' entity for 'get_time' intent. Current UTC: 10:00:00 UTC"
+    )
 
 
 def test_unimplemented_intent(action_executor: ActionExecutor):
     """Test an intent that is understood but not yet implemented."""
     intent = "set_reminder"
     entities = {"item": "groceries"}
-    dialogue_act, response_content = (
-        action_executor.execute_action_and_get_structured_response(intent, entities)
+    response = action_executor.execute_action_and_get_structured_response(
+        intent, entities
     )
-    assert dialogue_act == "unimplemented_action"
-    assert response_content == {"intent": "set_reminder"}
+    assert response["success"] is False
+    assert response["result_data"] is None
+    assert response["error"]["code"] == "UNIMPLEMENTED_ACTION"
+    assert (
+        response["error"]["message"]
+        == "I know the intent 'set_reminder', but I don't have a specific action "
+        "implemented for it yet."
+    )
+    assert response["error"]["details"] == (
+        "Intent: set_reminder, Entities: {'item': 'groceries'}"
+    )
 
 
 def test_unknown_intent(action_executor: ActionExecutor):
     """Test an unknown intent."""
     intent = "unknown"
     entities = {"raw_query": "random gibberish"}
-    dialogue_act, response_content = (
-        action_executor.execute_action_and_get_structured_response(intent, entities)
+    response = action_executor.execute_action_and_get_structured_response(
+        intent, entities
     )
-    assert dialogue_act == "unknown_intent_response"
-    assert response_content == {"raw_query": "random gibberish"}
+    assert response["success"] is False
+    assert response["result_data"] is None
+    assert response["error"]["code"] == "UNKNOWN_INTENT"
+    assert response["error"]["message"] == "I'm sorry, I don't understand that request."
+    assert (
+        response["error"]["details"]
+        == "Received unknown intent. Raw query: 'random gibberish'"
+    )
 
 
 def test_farewell_intent(action_executor: ActionExecutor):
     """Test the 'farewell' intent."""
     intent = "farewell"
     entities: dict[str, Any] = {}
-    dialogue_act, response_content = (
-        action_executor.execute_action_and_get_structured_response(intent, entities)
+    response = action_executor.execute_action_and_get_structured_response(
+        intent, entities
     )
-    assert dialogue_act == "farewell"
-    assert response_content == {}
+    assert response["success"] is True
+    assert response["error"] is None
+    assert response["result_data"]["dialogue_act"] == "farewell"
+    assert response["result_data"]["message"] == "Goodbye! It was nice talking to you."
 
 
 @patch("services.action_executor.src.action_executor.pytz.timezone")
 def test_get_time_unknown_timezone_error(
     mock_timezone: MagicMock, action_executor: ActionExecutor
 ):
-    """Test _get_time_for_location with an unknown timezone.
-
-    This specifically tests the handling of pytz.UnknownTimeZoneError.
-    """
-    # Cast mock_timezone to Any to satisfy mypy for .side_effect
+    """Test _get_time_for_location with an unknown timezone."""
     cast(Any, mock_timezone).side_effect = pytz.exceptions.UnknownTimeZoneError(
         "Unknown/Location"
     )
     intent = "get_time"
     entities = {"location": "Unknown/Location"}
-    dialogue_act, response_content = (
-        action_executor.execute_action_and_get_structured_response(intent, entities)
+    response = action_executor.execute_action_and_get_structured_response(
+        intent, entities
     )
-    assert dialogue_act == "inform_error"
-    assert response_content["error_message"] == (
-        "I'm not sure about the timezone for 'Unknown/Location'. Can you be more"
-        " specific?"
+    assert response["success"] is False
+    assert response["result_data"] is None
+    assert response["error"]["code"] == "TIME_ERROR"
+    assert response["error"]["message"] == (
+        "I'm not sure about the timezone for 'Unknown/Location'. Can you be more "
+        "specific?"
     )
+    assert "Failed to get time for Unknown/Location" in response["error"]["details"]
 
 
 @patch("services.action_executor.src.action_executor.pytz.timezone")
 def test_get_time_general_exception_in_location_helper(
     mock_timezone: MagicMock, action_executor: ActionExecutor
 ):
-    """Test _get_time_for_location with a general exception.
-
-    This tests error handling for unexpected issues during timezone lookup.
-    """
-    # Cast mock_timezone to Any to satisfy mypy for .side_effect
+    """Test _get_time_for_location with a general exception."""
     cast(Any, mock_timezone).side_effect = Exception("Some unexpected error")
     intent = "get_time"
     entities = {"location": "Anywhere"}
-    dialogue_act, response_content = (
-        action_executor.execute_action_and_get_structured_response(intent, entities)
+    response = action_executor.execute_action_and_get_structured_response(
+        intent, entities
     )
-    assert dialogue_act == "inform_error"
-    assert response_content["error_message"] == (
+    assert response["success"] is False
+    assert response["result_data"] is None
+    assert response["error"]["code"] == "TIME_ERROR"
+    assert response["error"]["message"] == (
         "I'm not sure about the timezone for 'Anywhere'. Can you be more specific?"
     )
+    assert "Failed to get time for Anywhere" in response["error"]["details"]
+
+
+# --- New Tests for intent name parsing robustness ---
+def test_execute_action_with_dict_intent_format(action_executor: ActionExecutor):
+    """Test handling of intent as a dictionary from NLU."""
+    intent_dict = {"name": "get_name", "confidence": 0.98}
+    entities: dict[str, Any] = {}
+    response = action_executor.execute_action_and_get_structured_response(
+        intent_dict, entities
+    )
+    assert response["success"] is True
+    assert response["result_data"]["dialogue_act"] == "inform_name"
+
+
+def test_execute_action_with_invalid_intent_format(action_executor: ActionExecutor):
+    """Test handling of an unparseable intent format."""
+    intent_list = ["get_name", 0.98]  # Invalid format
+    entities: dict[str, Any] = {}
+    response = action_executor.execute_action_and_get_structured_response(
+        intent_list, entities
+    )
+    assert response["success"] is False
+    assert response["result_data"] is None
+    assert response["error"]["code"] == "INVALID_INTENT_FORMAT"
+    assert (
+        response["error"]["message"]
+        == "ActionExecutor received an unparseable intent format."
+    )
+    assert "Intent: ['get_name', 0.98]" in response["error"]["details"]

@@ -1,5 +1,3 @@
-# main.py
-
 """Main entry point for the Viki Virtual Assistant application.
 
 This module orchestrates the core components of the Viki VA,
@@ -35,7 +33,7 @@ dotenv.load_dotenv()
 
 
 def configure_application_logging() -> None:
-    """Set up the global logging configuration for the entire Viki VA application.
+    """Set up the global logging configuration for the entire Viki VA.
 
     This function should be called once at application startup.
     """
@@ -73,7 +71,8 @@ def main() -> None:
         ValueError: If the 'GOOGLE_API_KEY' environment variable is not set
                     during the initialization of GeminiNLUService.
         Exception: Catches and reports any unexpected errors during the
-                   initialization of core components or during user input processing.
+                   initialization of core components or during user input
+                   processing.
 
     """
     # Set up logging
@@ -120,7 +119,9 @@ def main() -> None:
         return
     except Exception as e:
         main_logger.error(
-            "An unexpected error occurred during initialization: %s", e, exc_info=True
+            "An unexpected error occurred during initialization: %s",
+            e,
+            exc_info=True,
         )
         return
 
@@ -147,42 +148,65 @@ def main() -> None:
             main_logger.debug("\n--- Viki's NLU Analysis ---")
             main_logger.info(f"  Intent: {nlu_result.get('intent', 'N/A')}")
             main_logger.info(f"  Entities: {nlu_result.get('entities', 'N/A')}")
-            # You can uncomment these if you want to see all details again
-            # print(f"  Processed Text: {nlu_result.get('processed_text', 'N/A')}")
-            # print(f"  User ID: {nlu_result.get('user_id', 'N/A')}")
-            # print(f"  Device ID: {nlu_result.get('device_id', 'N/A')}")
-            # print(f"  Timestamp: {nlu_result.get('timestamp', 'N/A')}")
             if nlu_result.get("error"):
                 main_logger.debug(
                     f"  Error Message: {nlu_result.get('message', 'N/A')}"
                 )
 
             # --- Call the Action Executor ---
-            main_logger.debug("\n--- Viki's Response ---")
-            # Action Executor provides structured data
-            dialogue_act, response_content = (
+            main_logger.debug("\n--- Viki's Action Execution ---")
+            # Action Executor now provides a structured dictionary response
+            action_executor_response = (
                 action_executor.execute_action_and_get_structured_response(
                     nlu_result.get("intent", "unknown"), nlu_result.get("entities", {})
                 )
             )
 
-            # Main calls Language Center for NLG
-            main_logger.debug("\n--- Viki's Generated Response ---")
-            viki_nlg_output = language_center.generate_response(
-                dialogue_act=dialogue_act,
-                response_content=response_content,
-                conversation_id=str(
-                    session_device_id
-                ),  # FIX APPLIED HERE: Converted UUID to string
-                user_id="user_viki_session",  # Dummy user ID for now
-            )
-            main_logger.debug(
-                f"Viki: {
-                    viki_nlg_output.get(
-                        'generated_text', 'I could not generate a response.'
+            # Process the structured response from Action Executor
+            if action_executor_response.get("success"):
+                # Extract dialogue_act and response_content from result_data
+                # We assume dialogue_act is now passed within result_data
+                # for clarity
+                dialogue_act = action_executor_response["result_data"].get(
+                    "dialogue_act"
+                )
+                response_content = action_executor_response["result_data"]
+
+                # --- Direct Output for Simple Actions (for immediate testing) ---
+                # This allows Viki to speak directly if ActionExecutor already has
+                # a message.
+                if "message" in response_content:
+                    main_logger.info(
+                        f"Viki (ActionExecutor direct): {response_content['message']}"
                     )
-                }"
-            )
+                    continue  # Skip NLG for direct message to see immediate output
+
+                # Main calls Language Center for NLG
+                main_logger.debug("\n--- Viki's Generated Response (via NLG) ---")
+                viki_nlg_output = language_center.generate_response(
+                    dialogue_act=dialogue_act,
+                    response_content=response_content,
+                    conversation_id=str(session_device_id),
+                    user_id="user_viki_session",  # Dummy user ID for now
+                )
+                main_logger.debug(
+                    f"Viki (NLG): {
+                        viki_nlg_output.get(
+                            'generated_text', 'I could not generate a response.'
+                        )
+                    }"
+                )
+            else:
+                # Handle cases where Action Executor reports an error
+                error_info = action_executor_response.get("error", {})
+                error_code = error_info.get("code", "UNKNOWN_ERROR")
+                error_message = error_info.get(
+                    "message", "An unexpected action error occurred."
+                )
+                main_logger.error(
+                    f"ActionExecutor Error [{error_code}]: {error_message}"
+                )
+                main_logger.info(f"Viki: {error_message}")
 
         except NLUProcessingError as e:
             main_logger.error(
