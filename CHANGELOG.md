@@ -4,6 +4,7 @@
 ### Features
 
 * **action_executor:** Enhance action execution with structured responses and get_name intent ([#33](https://github.com/AppCarver/viki-va/issues/33)) ([c1edc2a](https://github.com/AppCarver/viki-va/commit/c1edc2a2a3603e613084468f68042bf070ed47e8))
+* **brain/pre-frontal-cortex:** Add conceptual LongTermMemory dependency ([#43](https://github.com/AppCarver/viki-va/issues/43)) ([9bb2761](https://github.com/AppCarver/viki-va/commit/9bb2761d34c298364e4147ca53a142b9073dc439))
 * **brain:** Implement ShortTermMemory component and minimal PFC integration ([#35](https://github.com/AppCarver/viki-va/issues/35)) ([736fd3d](https://github.com/AppCarver/viki-va/commit/736fd3d34abc4a22c7085c362682e299d0f7ab36))
 * Enhance NLU response parsing with robust markdown stripping ([#19](https://github.com/AppCarver/viki-va/issues/19)) ([8fc1027](https://github.com/AppCarver/viki-va/commit/8fc10279672b3c0216578204595936d89876a016))
 * Implement core brain:pre-frontal_cortex component with basic dialogue policy ([#41](https://github.com/AppCarver/viki-va/issues/41)) ([2693b28](https://github.com/AppCarver/viki-va/commit/2693b286d53f5c5936c3f96013c7e40c3346d91a))
