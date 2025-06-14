@@ -1,8 +1,9 @@
-# 0.1.0 (2025-06-13)
+# 0.1.0 (2025-06-14)
 
 
 ### Features
 
+* **action_executor:** Enhance action execution with structured responses and get_name intent ([#33](https://github.com/AppCarver/viki-va/issues/33)) ([c1edc2a](https://github.com/AppCarver/viki-va/commit/c1edc2a2a3603e613084468f68042bf070ed47e8))
 * Enhance NLU response parsing with robust markdown stripping ([#19](https://github.com/AppCarver/viki-va/issues/19)) ([8fc1027](https://github.com/AppCarver/viki-va/commit/8fc10279672b3c0216578204595936d89876a016))
 * Implement Natural Language Generation (NLG) service ([#17](https://github.com/AppCarver/viki-va/issues/17)) ([6757706](https://github.com/AppCarver/viki-va/commit/675770697206ffc03fc87b85e1813fbd753e2c7d))
 * Implement NLU confidence scores and refactor output structure ([#18](https://github.com/AppCarver/viki-va/issues/18)) ([2a9ea4f](https://github.com/AppCarver/viki-va/commit/2a9ea4f773298aa8d453fbaf41dbad94d1fdc484))
