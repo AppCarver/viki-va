@@ -18,9 +18,12 @@ logger = logging.getLogger(__name__)
 class ActionExecutor:
     """Dispatches actions based on identified intents and entities."""
 
+    # Define Viki's name as a class attribute
+    VIKI_NAME = "Viki"
+
     def __init__(self) -> None:
         """Initialize the ActionExecutor."""
-        logger.info("ActionExecutor initialized.")  # Consider replacing with logging
+        logger.info("ActionExecutor initialized.")
 
     def _get_time_for_location(self, location: str) -> str:
         """Get the current time for a specified location."""
@@ -30,8 +33,8 @@ class ActionExecutor:
             "london": "Europe/London",
             "tokyo": "Asia/Tokyo",
             "berlin": "Europe/Berlin",
-            "united states": "America/New_York",  # Added for completeness
-            "usa": "America/New_York",  # Added for completeness
+            "united states": "America/New_York",
+            "usa": "America/New_York",
         }
 
         normalized_location = location.lower()
@@ -44,7 +47,6 @@ class ActionExecutor:
                     break
 
         if not timezone_str:
-            # Return a simple string for now, will be wrapped in NLG later
             return (
                 f"I'm not sure about the timezone for '{location}'. "
                 "Can you be more specific?"
@@ -55,7 +57,6 @@ class ActionExecutor:
             utc_now: datetime = datetime.now(pytz.utc)
             local_time: datetime = utc_now.astimezone(tz)
 
-            # Format for direct inclusion in NLG content, or for easier parsing
             return local_time.strftime("%H:%M:%S on %A, %B %d, %Y")
 
         except pytz.exceptions.UnknownTimeZoneError:
@@ -67,69 +68,167 @@ class ActionExecutor:
             logger.error("ERROR in _get_time_for_location: %s", e, exc_info=True)
             return "I encountered an error trying to get the time for that location."
 
+    def _handle_get_name(self) -> dict[str, Any]:
+        """Handle the 'get_name' intent."""
+        return {
+            "success": True,
+            "result_data": {
+                "message": f"My name is {self.VIKI_NAME}.",
+                "viki_name": self.VIKI_NAME,
+                "dialogue_act": "inform_name",
+            },
+            "error": None,
+        }
+
     # Renamed/Refactored from the previous 'execute_action'
     def execute_action_and_get_structured_response(
-        self, intent: str, entities: dict[str, Any]
-    ) -> tuple[str, dict[str, Any]]:
+        self, intent: Any, entities: dict[str, Any]
+    ) -> dict[str, Any]:
         """Execute an action based on the given intent and entities.
 
         Args:
-            intent (str): The identified intent from the NLU service.
+            intent (Any): The identified intent from the NLU service.
+                          Expected to be a string or a dict like
+                          {'name': 'intent_name', 'confidence': ...}.
             entities (Dict[str, Any]): A dictionary of extracted entities.
 
         Returns:
-            Tuple[str, Dict[str, Any]]: A tuple containing:
-                - dialogue_act (str):
-                    The high-level communicative act Viki needs to perform.
-                - response_content (Dict[str, Any]):
-                    Data needed by NLG to form the response.
+            Dict[str, Any]: A dictionary containing the outcome of the action execution,
+                            following the standardized format.
+                            {
+                                "success": bool,
+                                "result_data": Dict[str, Any],
+                                "error": Dict[str, Any] | None
+                            }
 
         """
+        # Extract the intent name correctly, handling both string and dict formats
+        # We'll prioritize the 'name' key if the intent is a dictionary.
+        intent_name: str
+        if isinstance(intent, dict) and "name" in intent:
+            intent_name = intent["name"]
+        elif isinstance(intent, str):
+            intent_name = intent
+        else:
+            # Handle unexpected intent format
+            logger.error(f"Received unexpected intent format: {intent}")
+            return {
+                "success": False,
+                "result_data": None,
+                "error": {
+                    "code": "INVALID_INTENT_FORMAT",
+                    "message": "ActionExecutor received an unparseable intent format.",
+                    "details": f"Intent: {intent}",
+                },
+            }
+
         logger.debug(
-            f"ActionExecutor received intent: '{intent}' with entities: {entities}"
+            f"ActionExecutor received intent: '{intent_name}' with entities: {entities}"
         )
 
         # Map intents to dialogue_acts and prepare response_content
-        if intent == "greet":
-            user_name = entities.get("user_name")  # NLU might extract this
-            return "greet", {"user_name": user_name} if user_name else {}
-
-        elif intent == "tell_joke":
-            # For a joke, the NLG will use the 'joke_punchline' to form the full joke
-            return "tell_joke", {
-                "joke_punchline": "Why don't scientists trust atoms? "
-                "Because they make up everything!"
+        # All checks below should now use 'intent_name'
+        if intent_name == "greet":  # MODIFIED LINE
+            user_name = entities.get("user_name")
+            return {
+                "success": True,
+                "result_data": {
+                    "dialogue_act": "greet",
+                    "user_name": user_name,
+                    "message": f"Hello{' ' + user_name if user_name else ''}!",
+                },
+                "error": None,
             }
 
-        elif intent == "get_time":
+        elif intent_name == "get_name":  # MODIFIED LINE
+            return self._handle_get_name()
+
+        elif intent_name == "tell_joke":  # MODIFIED LINE
+            return {
+                "success": True,
+                "result_data": {
+                    "dialogue_act": "tell_joke",
+                    "joke_punchline": "Why don't scientists trust atoms? "
+                    "Because they make up everything!",
+                    "message": "Why don't scientists trust atoms? "
+                    "Because they make up everything!",
+                },
+                "error": None,
+            }
+
+        elif intent_name == "get_time":  # MODIFIED LINE
             location = entities.get("location")
             if location:
                 time_str = self._get_time_for_location(str(location))
-                # If _get_time_for_location returns an error message,
-                # we pass it to NLG to include in the response.
                 if (
                     "I'm not sure" in time_str
                     or "I don't recognize" in time_str
                     or "error" in time_str
                 ):
-                    return "inform_error", {"error_message": time_str}
+                    return {
+                        "success": False,
+                        "result_data": None,
+                        "error": {
+                            "code": "TIME_ERROR",
+                            "message": time_str,
+                            "details": f"Failed to get time for {location}",
+                        },
+                    }
                 else:
-                    return "inform_time", {"time": time_str, "location": location}
+                    return {
+                        "success": True,
+                        "result_data": {
+                            "dialogue_act": "inform_time",
+                            "time": time_str,
+                            "location": location,
+                            "message": f"The current time in {location} is {time_str}.",
+                        },
+                        "error": None,
+                    }
             else:
                 utc_now_str: str = datetime.now(pytz.utc).strftime("%H:%M:%S UTC")
-                return "ask_for_clarification", {
-                    "missing_info": "location for time",
-                    "current_utc_time": utc_now_str,
+                return {
+                    "success": False,
+                    "result_data": None,
+                    "error": {
+                        "code": "MISSING_PARAMETER",
+                        "message": "Please specify a location to get the time.",
+                        "details": f"Missing 'location' entity for 'get_time' intent. "
+                        f"Current UTC: {utc_now_str}",
+                    },
                 }
 
-        elif intent == "unknown":
+        elif intent_name == "unknown":  # MODIFIED LINE
             raw_query = entities.get("raw_query", "")
-            return "unknown_intent_response", {"raw_query": raw_query}
+            return {
+                "success": False,
+                "result_data": None,
+                "error": {
+                    "code": "UNKNOWN_INTENT",
+                    "message": "I'm sorry, I don't understand that request.",
+                    "details": f"Received unknown intent. Raw query: '{raw_query}'",
+                },
+            }
 
-        elif intent == "farewell":
-            return "farewell", {}
+        elif intent_name == "farewell":  # MODIFIED LINE
+            return {
+                "success": True,
+                "result_data": {
+                    "dialogue_act": "farewell",
+                    "message": "Goodbye! It was nice talking to you.",
+                },
+                "error": None,
+            }
 
-        # Default fallback if intent is understood but no specific action
-        # is implemented yet
         else:
-            return "unimplemented_action", {"intent": intent}
+            # Default fallback for unimplemented but recognized intents
+            return {
+                "success": False,
+                "result_data": None,
+                "error": {
+                    "code": "UNIMPLEMENTED_ACTION",
+                    "message": f"I know the intent '{intent_name}', "
+                    "but I don't have a specific action implemented for it yet.",
+                    "details": f"Intent: {intent}, Entities: {entities}",
+                },
+            }
