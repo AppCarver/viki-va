@@ -1,9 +1,10 @@
-# 0.1.0 (2025-06-14)
+# 0.1.0 (2025-06-15)
 
 
 ### Features
 
 * **action_executor:** Enhance action execution with structured responses and get_name intent ([#33](https://github.com/AppCarver/viki-va/issues/33)) ([c1edc2a](https://github.com/AppCarver/viki-va/commit/c1edc2a2a3603e613084468f68042bf070ed47e8))
+* **brain:long-term-mem:** Implement Viki's persistent Long-Term Memory ([#58](https://github.com/AppCarver/viki-va/issues/58)) ([4501160](https://github.com/AppCarver/viki-va/commit/45011601c21ac29e390d500d427d645dad606294))
 * **brain/pre-frontal-cortex:** Add conceptual LongTermMemory dependency ([#43](https://github.com/AppCarver/viki-va/issues/43)) ([9bb2761](https://github.com/AppCarver/viki-va/commit/9bb2761d34c298364e4147ca53a142b9073dc439))
 * **brain:** Implement ShortTermMemory component and minimal PFC integration ([#35](https://github.com/AppCarver/viki-va/issues/35)) ([736fd3d](https://github.com/AppCarver/viki-va/commit/736fd3d34abc4a22c7085c362682e299d0f7ab36))
 * Enhance NLU response parsing with robust markdown stripping ([#19](https://github.com/AppCarver/viki-va/issues/19)) ([8fc1027](https://github.com/AppCarver/viki-va/commit/8fc10279672b3c0216578204595936d89876a016))
