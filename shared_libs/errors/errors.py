@@ -47,4 +47,10 @@ class ActionExecutionError(VikiError):
     pass
 
 
+class LongTermMemoryError(Exception):
+    """Exception raised for errors during action execution."""
+
+    pass
+
+
 # Add other custom errors as needed
