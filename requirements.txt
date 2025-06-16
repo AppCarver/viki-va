@@ -49,6 +49,5 @@ types-pytz==2025.2.0.20250516
 typing-inspection==0.4.1
 typing_extensions==4.14.0
 urllib3==2.4.0
--e git+ssh://git@github.com/AppCarver/viki-va.git@adb2d2d3272bb9ad182c327be8e467ebb80931a4#egg=viki_va
 virtualenv==20.31.2
 websockets==14.2
