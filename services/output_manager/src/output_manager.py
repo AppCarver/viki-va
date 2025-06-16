@@ -11,34 +11,12 @@ import logging
 from typing import Any
 from uuid import UUID
 
+from shared_libs.errors.errors import (
+    DeviceNotFoundError,
+    UnsupportedOutputError,
+)
+
 from .output_manager_interface import OutputManagerInterface
-
-
-# Define custom errors as per spec (ideally in shared_libs/errors/errors.py)
-# If you haven't already, consider moving these to shared_libs/errors/errors.py
-# and importing them from there. For now, they're kept local for completeness.
-class DeviceNotFoundError(Exception):
-    """Raised when a device_id is not found in the registry."""
-
-    pass
-
-
-class UnsupportedOutputError(Exception):
-    """Raise when a device's capabilities don't match requested output."""
-
-    pass
-
-
-class TTSConversionError(Exception):
-    """Raised when Text-to-Speech conversion fails."""
-
-    pass
-
-
-class DeliveryChannelError(Exception):
-    """Raised when there's an issue sending via the specific platform API."""
-
-    pass
 
 
 class OutputManager(OutputManagerInterface):
