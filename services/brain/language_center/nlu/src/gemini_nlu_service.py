@@ -175,9 +175,9 @@ class GeminiNLUService(NLUServiceInterface):
             logger.debug(f"Raw Gemini Response Text: '{raw_gemini_response_text}'")
 
             # Use the shared response_parser to extract and parse the JSON.
-            parsed_nlu_data: dict[str, Any] | None = (
-                extract_json_from_markdown_code_block(raw_gemini_response_text)
-            )
+            parsed_nlu_data: dict[
+                str, Any
+            ] | None = extract_json_from_markdown_code_block(raw_gemini_response_text)
 
             if parsed_nlu_data is None:
                 logger.error(
