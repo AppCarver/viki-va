@@ -27,7 +27,7 @@ Homepage = "https://github.com/AppCarver/viki-va" # Please replace with your act
 
 [project.optional-dependencies]
 dev = [
-    "ruff==0.1.13",
+    "ruff==0.11.13",
     "pytest==8.4.0",
     "mypy==1.16.0",
     "pre-commit==3.7.1",
