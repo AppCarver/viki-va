@@ -34,6 +34,7 @@ dev = [
     "google-genai~=1.19.0",
     "python-dotenv~=1.0",
     "pymongo~=4.0",
+    "mongomock==4.3.0",
 ]
 
 # ----------------------------------
