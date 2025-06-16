@@ -25,6 +25,7 @@ swapping or addition of other NLU services (e.g., OpenAI, custom models)
 by simply implementing the `NLUServiceInterface`.
 
 Dependencies:
+------------
 - `google-genai` (The new SDK package name, installed via
   `pip install google-genai`)
 
