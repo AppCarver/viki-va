@@ -93,7 +93,7 @@ class ActionExecutor:
                           {'name': 'intent_name', 'confidence': ...}.
             entities (Dict[str, Any]): A dictionary of extracted entities.
 
-        Returns:
+        Returns
         -------
             Dict[str, Any]: A dictionary containing the outcome of the action execution,
                             following the standardized format.

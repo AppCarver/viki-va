@@ -39,7 +39,7 @@ class LongTermMemoryInterface(abc.ABC):
                 (e.g., "permanent", "temporary", "decaying").
             Defaults to "permanent" for user preferences.
 
-        Returns:
+        Returns
         -------
             Dict[str, Any]: A dictionary indicating success and optionally a fact_id.
                             Example: {"success": True, "fact_id": "UUID", "error": None}
@@ -67,7 +67,7 @@ class LongTermMemoryInterface(abc.ABC):
             semantic_query (Optional[str]):
                 Natural language query for semantic search (Future).
 
-        Returns:
+        Returns
         -------
             Dict[str, Any]: A dictionary containing a list of fact_data dictionaries.
                             Example: {"success": True, "facts": [{}], "error": None}
@@ -86,7 +86,7 @@ class LongTermMemoryInterface(abc.ABC):
             fact_id (UUID): The unique identifier of the fact to update.
             updated_data (Dict[str, Any]): Dictionary containing fields to update.
 
-        Returns:
+        Returns
         -------
             Dict[str, Any]: A dictionary indicating success.
                             Example: {"success": True, "error": None}
@@ -102,7 +102,7 @@ class LongTermMemoryInterface(abc.ABC):
         ----
             fact_id (UUID): The unique identifier of the fact to delete.
 
-        Returns:
+        Returns
         -------
             Dict[str, Any]: A dictionary indicating success.
                             Example: {"success": True, "error": None}

@@ -42,7 +42,7 @@ class ShortTermMemory:
             conversation_id (UUID):
                 The unique ID of the conversation whose context is to be retrieved.
 
-        Returns:
+        Returns
         -------
             Optional[Dict[str, Any]]:
                 The ConversationContext dictionary if found, otherwise None.
@@ -69,7 +69,7 @@ class ShortTermMemory:
             new_context_data (Dict[str, Any]):
                 A dictionary containing the updated or new ConversationContext data.
 
-        Returns:
+        Returns
         -------
             bool: True if the update was successful, False otherwise.
 
@@ -92,7 +92,7 @@ class ShortTermMemory:
             conversation_id (UUID):
                 The unique ID of the conversation whose context is to be cleared.
 
-        Returns:
+        Returns
         -------
             bool: True if context was successfully cleared, False if not found or error.
 

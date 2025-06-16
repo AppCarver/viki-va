@@ -117,7 +117,7 @@ class LongTermMemory(LongTermMemoryInterface):
             retention_policy (Optional[str]): Defines how long this fact should
                 be retained. Defaults to "permanent".
 
-        Returns:
+        Returns
         -------
             Dict[str, Any]: A dictionary indicating success and optionally a
                 fact_id.
@@ -187,7 +187,7 @@ class LongTermMemory(LongTermMemoryInterface):
             semantic_query (Optional[str]): Natural language query for
                 semantic search (Future).
 
-        Returns:
+        Returns
         -------
             Dict[str, Any]: A dictionary containing a list of fact_data
                 dictionaries.
@@ -259,7 +259,7 @@ class LongTermMemory(LongTermMemoryInterface):
             fact_id (UUID): The unique identifier of the fact to update.
             updated_data (dict[str, Any]): Dictionary containing fields to update.
 
-        Returns:
+        Returns
         -------
             dict[str, Any]: A dictionary indicating success.
                             Example: {"success": True, "error": None}
@@ -312,7 +312,7 @@ class LongTermMemory(LongTermMemoryInterface):
         ----
             fact_id (UUID): The unique identifier of the fact to delete.
 
-        Returns:
+        Returns
         -------
             dict[str, Any]: A dictionary indicating success.
                             Example: {"success": True, "error": None}

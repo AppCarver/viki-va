@@ -72,7 +72,7 @@ class LanguageCenter:
             conversation_id: The ID of the current conversation.
             user_id: The ID of the user.
 
-        Returns:
+        Returns
         -------
             A dictionary containing the NLU result (intent, entities, confidence, etc.).
 
@@ -101,7 +101,7 @@ class LanguageCenter:
             conversation_id: The ID of the current conversation (for context retrieval).
             user_id: The ID of the user (for context retrieval).
 
-        Returns:
+        Returns
         -------
             A dictionary containing the generated text, e.g., {"generated_text": "..."}.
 

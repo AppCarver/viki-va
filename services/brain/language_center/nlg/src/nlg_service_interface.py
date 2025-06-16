@@ -41,7 +41,7 @@ class NLGServiceInterface(ABC):
                 parts of the ongoing conversation context, such as user preferences,
                 previous turns, active goals, etc.
 
-        Returns:
+        Returns
         -------
             dict[str, str]:  A dictionary containing the generated text, e.g.,
                 {"generated_text": "The weather in London is 20 degrees Celsius."}.
@@ -49,7 +49,7 @@ class NLGServiceInterface(ABC):
                 return {"generated_text": "I'm sorry, I couldn't generate a response
                 for that."} or raise an appropriate error.
 
-        Raises:
+        Raises
         ------
             NLGGenerationError: If there's an error during NLG processing
             (e.g., API issues, invalid response).

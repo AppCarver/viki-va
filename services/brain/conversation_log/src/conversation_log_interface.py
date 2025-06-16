@@ -110,7 +110,7 @@ class ConversationLogInterface(abc.ABC):
         ----
             turn (ConversationTurn): A fully formed ConversationTurn object.
 
-        Returns:
+        Returns
         -------
             Dict[str, Any]: A dictionary indicating success and the turn_id.
                             Example: {"success": True, "turn_id": "UUID",
@@ -138,7 +138,7 @@ class ConversationLogInterface(abc.ABC):
             limit (Optional[int]): Maximum number of turns to retrieve.
             offset (Optional[int]): Number of turns to skip from the beginning.
 
-        Returns:
+        Returns
         -------
             Dict[str, Any]: A dictionary containing a list of ConversationTurn
                             objects. Example: {"success": True,
@@ -160,7 +160,7 @@ class ConversationLogInterface(abc.ABC):
             user_id (UUID): The ID of the user.
             limit (Optional[int]): Maximum number of recent turns to retrieve.
 
-        Returns:
+        Returns
         -------
             Dict[str, Any]: A dictionary containing a list of ConversationTurn
                             objects. Example: {"success": True,

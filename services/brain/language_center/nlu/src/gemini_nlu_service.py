@@ -140,11 +140,11 @@ class GeminiNLUService(NLUServiceInterface):
         ----
             text: The user's input text.
 
-        Returns:
+        Returns
         -------
             A dictionary containing the NLU result.
 
-        Raises:
+        Raises
         ------
             NLUProcessingError:
                 If there's an issue with the Gemini API call or response.

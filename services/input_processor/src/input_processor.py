@@ -108,7 +108,7 @@ class InputProcessor:
             text: The raw text input from the user.
             device_id: The UUID of the device from which the input originated.
 
-        Returns:
+        Returns
         -------
             A dictionary containing the processed result, including success status,
             extracted intent and entities, processed text, user_id,
@@ -229,7 +229,7 @@ class InputProcessor:
             raw_audio_data: The raw audio bytes from the user.
             device_id: The UUID of the device from which the input originated.
 
-        Returns:
+        Returns
         -------
             A dictionary containing the processed result, similar to process_text_input.
 
@@ -255,11 +255,11 @@ class InputProcessor:
         ----
             text: The text to be processed by the NLU service.
 
-        Returns:
+        Returns
         -------
             A dictionary containing the intent and entities from the NLU service.
 
-        Raises:
+        Raises
         ------
             NLUProcessingError: If the underlying NLU service encounters an error.
 
