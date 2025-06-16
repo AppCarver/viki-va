@@ -11,9 +11,9 @@ Gemini API access. This is typically loaded from a .env file.
 """
 
 import logging
+import os  # Import os for path handling
 import sys
 import uuid
-from unittest.mock import MagicMock
 from uuid import UUID  # Explicitly import UUID for type consistency
 
 import dotenv
@@ -26,6 +26,9 @@ from services.brain.language_center.nlu.src.gemini_nlu_service import (
     GeminiNLUService,
 )
 from services.brain.language_center.src.language_center import LanguageCenter
+
+## NEW IMPORTS FOR LongTermMemory and ConversationLog ##
+from services.brain.long_term_mem.src.long_term_memory import LongTermMemory
 from services.brain.pre_forntal_cortex.src.pre_frontal_cortex import PrefrontalCortex
 
 ## NEW CODE (FROM PREVIOUS STEPS) ##
@@ -35,7 +38,7 @@ from services.input_processor.src.input_processor import (
     NLUProcessingError,
 )
 
-## END NEW CODE (FROM PREVIOUS STEPS) ##
+## END NEW IMPORTS ##
 # --- NEW IMPORTS FOR OutputManager ---
 from services.output_manager.src.output_manager import OutputManager
 
@@ -95,6 +98,13 @@ def main() -> None:
     # --- Configuration and Initialization ---
     gemini_model_name = "gemini-1.5-flash"
 
+    # Define paths for persistent data files
+    data_dir = "data"
+    os.makedirs(data_dir, exist_ok=True)  # Ensure data directory exists
+
+    long_term_memory_file = os.path.join(data_dir, "long_term_memory.json")
+    # conversation_log_file = os.path.join(data_dir, "conversation_log.json")
+
     # Generate a dummy device ID for this session
     session_device_id = uuid.uuid4()
     # For a single session, we'll use a consistent user_id
@@ -122,17 +132,25 @@ def main() -> None:
         action_executor = ActionExecutor()
 
         ## NEW CODE (from previous steps): Initialize
-        ## ShortTermMemory and PrefrontalCortex ##
+        ## ShortTermMemory, LongTermMemory, and ConversationLog ##
         short_term_memory = ShortTermMemory()
-        long_term_memory = MagicMock()
+        # Initialize LongTermMemory with its file path
+        long_term_memory = LongTermMemory(file_path=long_term_memory_file)
+        # Initialize ConversationLog with its file path
+        # conversation_log = ConversationLog(file_path=conversation_log_file)
 
         prefrontal_cortex = PrefrontalCortex(
             short_term_memory=short_term_memory,
             action_executor=action_executor,
-            long_term_memory=long_term_memory,
+            long_term_memory=long_term_memory,  # Pass the real LTM instance
+            # Future: Uncomment when PFC accepts ConversationLog
+            # conversation_log=conversation_log
         )
         main_logger.info(
-            "ShortTermMemory, ActionExecutor, and PrefrontalCortex initialized."
+            "ShortTermMemory, "
+            "LongTermMemory, "
+            "ActionExecutor, "
+            "and PrefrontalCortex initialized."
         )
         ## END NEW CODE (from previous steps) ##
 
