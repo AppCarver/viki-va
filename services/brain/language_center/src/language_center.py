@@ -47,6 +47,7 @@ class LanguageCenter:
         """Initialize the LanguageCenter with NLU and NLG service implementations.
 
         Args:
+        ----
             nlu_service: An instance of a class implementing NLUServiceInterface,
                          responsible for understanding user input.
             nlg_service: An instance of a class implementing NLGServiceInterface,
@@ -66,11 +67,13 @@ class LanguageCenter:
         """Process user input using the configured NLU service.
 
         Args:
+        ----
             text: The raw text input from the user.
             conversation_id: The ID of the current conversation.
             user_id: The ID of the user.
 
         Returns:
+        -------
             A dictionary containing the NLU result (intent, entities, confidence, etc.).
 
         """
@@ -92,12 +95,14 @@ class LanguageCenter:
         """Generate a natural language response using the configured NLG service.
 
         Args:
+        ----
             dialogue_act: The high-level intent or action for Viki's response.
             response_content: Structured data to be incorporated into the response.
             conversation_id: The ID of the current conversation (for context retrieval).
             user_id: The ID of the user (for context retrieval).
 
         Returns:
+        -------
             A dictionary containing the generated text, e.g., {"generated_text": "..."}.
 
         """

@@ -33,6 +33,7 @@ class ConversationTurn:
         """Initialize a ConversationTurn.
 
         Args:
+        ----
             turn_id (UUID): Unique identifier for this turn.
             conversation_id (UUID): Identifier for the conversation this turn
                                     belongs to.
@@ -106,9 +107,11 @@ class ConversationLogInterface(abc.ABC):
         """Store a new conversation turn record.
 
         Args:
+        ----
             turn (ConversationTurn): A fully formed ConversationTurn object.
 
         Returns:
+        -------
             Dict[str, Any]: A dictionary indicating success and the turn_id.
                             Example: {"success": True, "turn_id": "UUID",
                                       "error": None}
@@ -128,6 +131,7 @@ class ConversationLogInterface(abc.ABC):
         """Retrieve a sequence of ConversationTurn records for a specific conversation.
 
         Args:
+        ----
             conversation_id (UUID): The ID of the conversation.
             from_timestamp (Optional[datetime]): Start timestamp for filtering.
             to_timestamp (Optional[datetime]): End timestamp for filtering.
@@ -135,6 +139,7 @@ class ConversationLogInterface(abc.ABC):
             offset (Optional[int]): Number of turns to skip from the beginning.
 
         Returns:
+        -------
             Dict[str, Any]: A dictionary containing a list of ConversationTurn
                             objects. Example: {"success": True,
                             "history": [turn1, turn2], "error": None}
@@ -151,10 +156,12 @@ class ConversationLogInterface(abc.ABC):
         Across all conversations for a given user.
 
         Args:
+        ----
             user_id (UUID): The ID of the user.
             limit (Optional[int]): Maximum number of recent turns to retrieve.
 
         Returns:
+        -------
             Dict[str, Any]: A dictionary containing a list of ConversationTurn
                             objects. Example: {"success": True,
                             "history": [turn1, turn2], "error": None}

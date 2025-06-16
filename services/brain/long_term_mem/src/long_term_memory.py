@@ -25,6 +25,7 @@ class LongTermMemory(LongTermMemoryInterface):
         """Initialize the LongTermMemory component.
 
         Args:
+        ----
             file_path (str): The path to the JSON file used for memory
                 persistence.
 
@@ -110,12 +111,14 @@ class LongTermMemory(LongTermMemoryInterface):
         """Store a new fact or piece of information in long-term memory.
 
         Args:
+        ----
             user_id (UUID): The ID of the user associated with the fact.
             fact_data (Dict[str, Any]): A dictionary containing the fact's details.
             retention_policy (Optional[str]): Defines how long this fact should
                 be retained. Defaults to "permanent".
 
         Returns:
+        -------
             Dict[str, Any]: A dictionary indicating success and optionally a
                 fact_id.
                             Example: {"success": True, "fact_id": "UUID",
@@ -176,6 +179,7 @@ class LongTermMemory(LongTermMemoryInterface):
         """Retrieve facts from long-term memory based on provided criteria.
 
         Args:
+        ----
             user_id (Optional[UUID]): Filter facts by a specific user.
             query_criteria (Optional[Dict[str, Any]]): A dictionary specifying
                 conditions for retrieval (e.g., {'type': 'preference'}).
@@ -184,6 +188,7 @@ class LongTermMemory(LongTermMemoryInterface):
                 semantic search (Future).
 
         Returns:
+        -------
             Dict[str, Any]: A dictionary containing a list of fact_data
                 dictionaries.
                             Example: {"success": True, "facts": [{}],
@@ -250,10 +255,12 @@ class LongTermMemory(LongTermMemoryInterface):
         """Update an existing fact in long-term memory.
 
         Args:
+        ----
             fact_id (UUID): The unique identifier of the fact to update.
             updated_data (dict[str, Any]): Dictionary containing fields to update.
 
         Returns:
+        -------
             dict[str, Any]: A dictionary indicating success.
                             Example: {"success": True, "error": None}
 
@@ -302,9 +309,11 @@ class LongTermMemory(LongTermMemoryInterface):
         """Delete a fact from long-term memory.
 
         Args:
+        ----
             fact_id (UUID): The unique identifier of the fact to delete.
 
         Returns:
+        -------
             dict[str, Any]: A dictionary indicating success.
                             Example: {"success": True, "error": None}
 

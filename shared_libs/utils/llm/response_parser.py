@@ -38,9 +38,11 @@ def extract_json_from_markdown_code_block(
     falls back to simpler string stripping (removeprefix/removesuffix).
 
     Args:
+    ----
         text: The input string, typically an LLM response containing JSON.
 
     Returns:
+    -------
         A dictionary representing the JSON object if successfully extracted
         and parsed. Returns None if no valid JSON can be extracted or parsed.
 
@@ -83,9 +85,11 @@ def _fallback_strip_and_parse(text: str) -> dict[str, Any] | None:
     This is a less robust fallback.
 
     Args:
+    ----
         text: The input string.
 
     Returns:
+    -------
         A dictionary representing the JSON object, or None if parsing fails.
 
     """

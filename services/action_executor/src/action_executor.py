@@ -87,12 +87,14 @@ class ActionExecutor:
         """Execute an action based on the given intent and entities.
 
         Args:
+        ----
             intent (Any): The identified intent from the NLU service.
                           Expected to be a string or a dict like
                           {'name': 'intent_name', 'confidence': ...}.
             entities (Dict[str, Any]): A dictionary of extracted entities.
 
         Returns:
+        -------
             Dict[str, Any]: A dictionary containing the outcome of the action execution,
                             following the standardized format.
                             {

@@ -29,6 +29,7 @@ class NLGGenerationError(VikiError):
         with the underlying API call.
 
         Args:
+        ----
             message (str, optional): A descriptive error message.
             Defaults to "NLG generation failed.".
             original_exception (Exception, optional): The original exception that caused

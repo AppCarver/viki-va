@@ -34,6 +34,7 @@ class OutputManagerInterface(ABC):
         Ensuring we are adapting it to the device's capabilities.
 
         Args:
+        ----
             conversation_id (UUID): The ID of the conversation.
             user_id (UUID): The ID of the user to whom the response is addressed.
             device_id (str):

@@ -48,6 +48,7 @@ class ConversationLog(ConversationLogInterface):
         Connects to MongoDB and sets up the logger.
 
         Args:
+        ----
             mongo_host (str): The hostname or IP address of the MongoDB server.
             mongo_port (int): The port number of the MongoDB server.
             db_name (str): The name of the MongoDB database to use.

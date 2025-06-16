@@ -20,15 +20,16 @@ import sys
 from typing import Any
 from unittest.mock import patch
 
+from shared_libs.utils.llm.response_parser import (
+    _fallback_strip_and_parse,
+    extract_json_from_markdown_code_block,
+)
+
 # Adjust the import path for the module under test
 # This allows running tests directly or as part of a larger suite
 sys.path.insert(
     0, "shared_libs/utils/llm"
 )  # Add the directory containing response_parser.py
-from shared_libs.utils.llm.response_parser import (
-    _fallback_strip_and_parse,
-    extract_json_from_markdown_code_block,
-)
 
 # --- Tests for extract_json_from_markdown_code_block ---
 
