@@ -29,6 +29,7 @@ class NLGGenerationError(VikiError):
         with the underlying API call.
 
         Args:
+        ----
             message (str, optional): A descriptive error message.
             Defaults to "NLG generation failed.".
             original_exception (Exception, optional): The original exception that caused
@@ -54,3 +55,10 @@ class LongTermMemoryError(Exception):
 
 
 # Add other custom errors as needed
+class ConversationLogError(Exception):
+    """Exception raised for errors within the ConversationLog component."""
+
+    def __init__(self, message: str) -> None:
+        """Initialize the ConversationLogError with a message."""
+        self.message = message
+        super().__init__(self.message)

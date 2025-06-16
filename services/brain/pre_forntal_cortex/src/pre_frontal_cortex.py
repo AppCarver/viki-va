@@ -107,9 +107,9 @@ class PrefrontalCortex:
         # Crucial for ShortTermMemory's expiration logic (future feature)
         # Assuming a 'last_active_timestamp' will be part of ConversationContext
         # For now, just add a placeholder.
-        current_context["last_active_timestamp"] = (
-            "2025-06-14T12:00:00Z"  # Placeholder for current time
-        )
+        current_context[
+            "last_active_timestamp"
+        ] = "2025-06-14T12:00:00Z"  # Placeholder for current time
 
         # self.short_term_memory.update_conversation_context(
         #    conversation_id, current_context

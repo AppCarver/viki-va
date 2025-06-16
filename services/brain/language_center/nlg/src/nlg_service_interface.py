@@ -32,6 +32,7 @@ class NLGServiceInterface(ABC):
         """Generate an NL response based on the dialogue act and content.
 
         Args:
+        ----
             dialogue_act (str): The high-level intent or ation VIKI needs to preform.
             response_content (dict[str, Any]): A dictionary containing key-value
                 pairs of data needed to form the response
@@ -40,14 +41,16 @@ class NLGServiceInterface(ABC):
                 parts of the ongoing conversation context, such as user preferences,
                 previous turns, active goals, etc.
 
-        Returns:
+        Returns
+        -------
             dict[str, str]:  A dictionary containing the generated text, e.g.,
                 {"generated_text": "The weather in London is 20 degrees Celsius."}.
                 If generation fails or results in an empty response, it should ideally
                 return {"generated_text": "I'm sorry, I couldn't generate a response
                 for that."} or raise an appropriate error.
 
-        Raises:
+        Raises
+        ------
             NLGGenerationError: If there's an error during NLG processing
             (e.g., API issues, invalid response).
 

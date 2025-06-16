@@ -78,6 +78,7 @@ class OutputManager(OutputManagerInterface):
         Adapting it to the device's capabilities.
 
         Args:
+        ----
             conversation_id (UUID): The ID of the conversation.
             user_id (UUID): The ID of the user to whom the response is
                 addressed.
@@ -88,7 +89,8 @@ class OutputManager(OutputManagerInterface):
             output_format_hints (dict, optional): Additional hints for desired
                 output formatting.
 
-        Returns:
+        Returns
+        -------
             Dict[str, Any]: A dictionary indicating the outcome of the delivery
                 attempt. Expected keys: "success", "delivery_status",
                 "message_id", "error".

@@ -31,8 +31,10 @@ dev = [
     "pytest==8.4.0",
     "mypy==1.16.0",
     "pre-commit==3.7.1",
-    "google-genai~=1.19.0",      # <--- Allow minor updates (e.g., 1.19.x, 1.20.x, but not 2.0.0)
+    "google-genai~=1.19.0",
     "python-dotenv~=1.0",
+    "pymongo~=4.0",
+    "mongomock==4.3.0",
 ]
 
 # ----------------------------------
@@ -93,7 +95,13 @@ exclude = [ # Paths to exclude from all Ruff checks (this remains at tool.ruff l
     "services/*/config.json", # Configs inside service directories
     "services/*/tests", # Exclude tests from linting (often useful for more lenient test code)
 ]
-
+# --- NEW SECTION: pydocstyle configuration ---
+[tool.ruff.lint.pydocstyle]
+# Set the docstring convention to NumPy style.
+# This will automatically disable incompatible rules like D211 and D213
+# and properly enforce the D406/D407 rules for section headers.
+# Other options include "google" or "pep257".
+convention = "numpy"
 [tool.ruff.lint.mccabe] # Configuration for McCabe complexity checks (rule C901, included in 'C' category if selected)
 max-complexity = 10
 

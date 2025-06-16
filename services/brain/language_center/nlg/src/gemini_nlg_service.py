@@ -24,7 +24,8 @@ implementing the `NLGServiceInterface`.
 Dependencies:
 - `google-genai` (Installed via `pip install google-genai`)
 
-Raises:
+Raises
+------
     ValueError:
         If the GOOGLE_API_KEY environment variable is not set during initialization.
     NLGGenerationError: For any issues encountered during the NLG processing
@@ -102,10 +103,12 @@ class GeminiNLGService(NLGServiceInterface):
         It also ensures that the necessary API key is available in the environment.
 
         Args:
+        ----
             model_name (str, optional): The name of the Gemini model to use for NLG
                                         (e.g., "gemini-pro"). Defaults to "gemini-pro".
 
-        Raises:
+        Raises
+        ------
             ValueError: If the `GOOGLE_API_KEY` environment variable is not set,
                         which is required to authenticate with the Gemini API.
 

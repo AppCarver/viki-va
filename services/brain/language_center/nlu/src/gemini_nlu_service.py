@@ -25,6 +25,7 @@ swapping or addition of other NLU services (e.g., OpenAI, custom models)
 by simply implementing the `NLUServiceInterface`.
 
 Dependencies:
+------------
 - `google-genai` (The new SDK package name, installed via
   `pip install google-genai`)
 
@@ -140,11 +141,11 @@ class GeminiNLUService(NLUServiceInterface):
         ----
             text: The user's input text.
 
-        Returns:
+        Returns
         -------
             A dictionary containing the NLU result.
 
-        Raises:
+        Raises
         ------
             NLUProcessingError:
                 If there's an issue with the Gemini API call or response.
@@ -174,9 +175,9 @@ class GeminiNLUService(NLUServiceInterface):
             logger.debug(f"Raw Gemini Response Text: '{raw_gemini_response_text}'")
 
             # Use the shared response_parser to extract and parse the JSON.
-            parsed_nlu_data: dict[str, Any] | None = (
-                extract_json_from_markdown_code_block(raw_gemini_response_text)
-            )
+            parsed_nlu_data: dict[
+                str, Any
+            ] | None = extract_json_from_markdown_code_block(raw_gemini_response_text)
 
             if parsed_nlu_data is None:
                 logger.error(

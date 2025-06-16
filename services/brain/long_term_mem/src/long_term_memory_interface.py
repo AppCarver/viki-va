@@ -28,6 +28,7 @@ class LongTermMemoryInterface(abc.ABC):
         """Store a new fact or piece of information in long-term memory.
 
         Args:
+        ----
             user_id (UUID):
                 The ID of the user associated with the fact (if user-specific).
             fact_data (Dict[str, Any]):
@@ -38,7 +39,8 @@ class LongTermMemoryInterface(abc.ABC):
                 (e.g., "permanent", "temporary", "decaying").
             Defaults to "permanent" for user preferences.
 
-        Returns:
+        Returns
+        -------
             Dict[str, Any]: A dictionary indicating success and optionally a fact_id.
                             Example: {"success": True, "fact_id": "UUID", "error": None}
 
@@ -56,6 +58,7 @@ class LongTermMemoryInterface(abc.ABC):
         """Retrieve facts from long-term memory based on provided criteria.
 
         Args:
+        ----
             user_id (Optional[UUID]): Filter facts by a specific user.
             query_criteria (Optional[Dict[str, Any]]):
                 A dictionary specifying conditions
@@ -64,7 +67,7 @@ class LongTermMemoryInterface(abc.ABC):
             semantic_query (Optional[str]):
                 Natural language query for semantic search (Future).
 
-        Returns:
+        Returns
         -------
             Dict[str, Any]: A dictionary containing a list of fact_data dictionaries.
                             Example: {"success": True, "facts": [{}], "error": None}
@@ -79,10 +82,11 @@ class LongTermMemoryInterface(abc.ABC):
         """Update an existing fact in long-term memory.
 
         Args:
+        ----
             fact_id (UUID): The unique identifier of the fact to update.
             updated_data (Dict[str, Any]): Dictionary containing fields to update.
 
-        Returns:
+        Returns
         -------
             Dict[str, Any]: A dictionary indicating success.
                             Example: {"success": True, "error": None}
@@ -95,9 +99,11 @@ class LongTermMemoryInterface(abc.ABC):
         """Delete a fact from long-term memory.
 
         Args:
+        ----
             fact_id (UUID): The unique identifier of the fact to delete.
 
-        Returns:
+        Returns
+        -------
             Dict[str, Any]: A dictionary indicating success.
                             Example: {"success": True, "error": None}
 
