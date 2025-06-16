@@ -6,9 +6,11 @@ cfgv==3.4.0
 charset-normalizer==3.4.2
 coverage==7.8.2
 distlib==0.3.9
+dnspython==2.7.0
 filelock==3.18.0
 google-auth==2.40.3
 google-genai==1.19.0
+googleapis-common-protos==1.70.0
 h11==0.16.0
 httpcore==1.0.9
 httpx==0.28.1
@@ -23,11 +25,14 @@ pathspec==0.12.1
 platformdirs==4.3.8
 pluggy==1.6.0
 pre-commit==3.7.1
+proto-plus==1.26.1
+protobuf==6.31.1
 pyasn1==0.6.1
 pyasn1_modules==0.4.2
 pydantic==2.11.5
 pydantic_core==2.33.2
 Pygments==2.19.1
+pymongo==4.13.1
 pytest==8.4.0
 pytest-cov==6.1.1
 pytest-mock==3.14.1
@@ -42,5 +47,6 @@ types-pytz==2025.2.0.20250516
 typing-inspection==0.4.1
 typing_extensions==4.14.0
 urllib3==2.4.0
+-e git+ssh://git@github.com/AppCarver/viki-va.git@9a0f3ef9738a73bddc62c1f59f58b0f5c8d12b25#egg=viki_va
 virtualenv==20.31.2
 websockets==14.2
